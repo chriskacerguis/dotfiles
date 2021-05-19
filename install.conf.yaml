@@ -6,7 +6,9 @@
 
 - link:
     ~/.aliases: aliases
-    ~/.gitconfig: gitconfig
+    ~/.gitconfig:
+      force: true
+      path: gitconfig
     ~/.gitignore: gitignore
     ~/.zshenv:
       force: true
