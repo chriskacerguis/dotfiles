@@ -24,3 +24,6 @@
 [user]
   name = Chris Kacerguis
   email = chriskacerguis@users.noreply.github.com
+
+[pull]
+	rebase = false
