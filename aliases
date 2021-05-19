@@ -6,10 +6,11 @@ alias ln="ln -v"
 alias lt='du -sh * | sort -h'
 alias gh='history|grep'
 alias tcn='mv --force -t ~/.local/share/Trash '
+alias _="sudo"
+alias rr="rm -rf"
 
 alias ve='python3 -m venv ./venv'
 alias va='source ./venv/bin/activate'
-
 
 alias mkdir="mkdir -p"
 alias p="cd ~/Projects"
@@ -48,3 +49,8 @@ alias dsa="docker ps -q | awk '{print $1}' | xargs -o docker stop"
 
 # Show open ports
 alias ports='netstat -tulanp'
+
+# IP Addresses
+alias ip="curl -s ipinfo.io | jq -r '.ip'"
+alias ipl="ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'"
+
