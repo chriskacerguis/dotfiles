@@ -1,0 +1,50 @@
+alias cpv='rsync -ah --info=progress2'
+alias mnt='mount | grep -E ^/dev | column -t'
+alias ls='ls -F'
+alias ll='ls -lah'
+alias ln="ln -v"
+alias lt='du -sh * | sort -h'
+alias gh='history|grep'
+alias tcn='mv --force -t ~/.local/share/Trash '
+
+alias ve='python3 -m venv ./venv'
+alias va='source ./venv/bin/activate'
+
+
+alias mkdir="mkdir -p"
+alias p="cd ~/Projects"
+alias afk="open -a /System/Library/CoreServices/ScreenSaverEngine.app"
+alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pasteboard.'"
+alias prikey="more ~/.ssh/id_rsa | pbcopy | echo '=> Private key copied to pasteboard.'"
+
+# Pretty print the path
+alias path='echo $PATH | tr -s ":" "\n"'
+
+# Start the docker-compose stack in the current directory
+alias dcu="docker-compose up -d"
+
+# Start the docker-compose stack in the current directory and rebuild the images
+alias dcub="docker-compose up -d --build"
+
+# Stop, delete (down) or restart the docker-compose stack in the current directory
+alias dcs="docker-compose stop"
+alias dcd="docker-compose down"
+alias dcr="docker-compose restart"
+
+# Show the logs for the docker-compose stack in the current directory
+# May be extended with the service name to get service-specific logs, like
+# 'dcl php' to get the logs of the php container
+alias dcl="docker-compose logs"
+
+# Quickly run the docker exec command like this: 'dex container-name bash'
+alias dex="docker exec -it"
+
+# 'docker ps' displays the currently running containers
+alias dps="docker ps"
+
+# This command is a neat shell pipeline to stop all running containers no matter
+# where you are and without knowing any container names
+alias dsa="docker ps -q | awk '{print $1}' | xargs -o docker stop"
+
+# Show open ports
+alias ports='netstat -tulanp'

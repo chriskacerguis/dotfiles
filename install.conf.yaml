@@ -1,0 +1,24 @@
+- defaults:
+    link:
+      relink: true
+
+- clean: ['~']
+
+- link:
+    ~/.aliases: aliases
+    ~/.gitconfig: gitconfig
+    ~/.gitignore: gitignore
+    ~/.zshenv:
+      force: true
+      path: zshenv
+    ~/.zshrc:
+      force: true
+      path: zshrc
+
+- create:
+    - ~/Projects
+    - ~/.vim/undo-history
+
+- shell:
+  - [chsh -s $(which zsh), Making zsh the default shell]
+  - [git submodule update --init --recursive, Installing submodules]
