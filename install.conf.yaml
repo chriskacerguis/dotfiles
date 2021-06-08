@@ -16,6 +16,9 @@
     ~/.zshrc:
       force: true
       path: zshrc
+    ~/.zprofile:
+      force: true
+      path: zprofile
 
 - create:
     - ~/Projects
