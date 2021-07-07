@@ -29,3 +29,4 @@
   - [chsh -s $(which zsh), Making zsh the default shell]
   - [git submodule update --init --recursive, Installing submodules]
   - [git config --global pull.rebase false, Set merge strategy]
+  - [brew install starship]
