@@ -30,4 +30,3 @@
   - [git submodule update --init --recursive, Installing submodules]
   - [git config --global pull.rebase false, Set merge strategy]
   - [eval "$(/opt/homebrew/bin/brew shellenv)"]
-  - [brew install starship]
