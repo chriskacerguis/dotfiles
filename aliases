@@ -48,7 +48,7 @@ alias dps="docker ps"
 alias dsa="docker ps -q | awk '{print $1}' | xargs -o docker stop"
 
 # Show open ports
-alias ports='netstat -tulanp'
+alias ports='netstat -tulanp tcp'
 
 # IP Addresses
 alias ip="curl -s ipinfo.io | jq -r '.ip'"
