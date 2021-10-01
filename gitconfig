@@ -26,4 +26,4 @@
   email = chriskacerguis@users.noreply.github.com
 
 [pull]
-	rebase = false
+  rebase = false
