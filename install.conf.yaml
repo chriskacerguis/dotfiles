@@ -19,7 +19,10 @@
     ~/.zprofile:
       force: true
       path: zprofile
-
+    ~/.config/starship.toml:
+      force: true
+      path: starship.toml
+      
 - create:
     - ~/Projects
     - ~/.vim/undo-history
