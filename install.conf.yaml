@@ -19,14 +19,13 @@
     ~/.zprofile:
       force: true
       path: zprofile
-    ~/.config/starship.toml:
+    ~/.hyper.js:
       force: true
-      path: starship.toml
+      path: hyper.js
       
 - create:
     - ~/Projects
     - ~/.vim/undo-history
-    - ~/.config
     
 - shell:
   - [touch ~/.hushlogin, Add .hushlogin]

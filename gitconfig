@@ -26,4 +26,4 @@
   email = chriskacerguis@gmail.com
 
 [pull]
-  rebase = false
+	rebase = false
