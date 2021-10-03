@@ -26,7 +26,8 @@
 - create:
     - ~/Projects
     - ~/.vim/undo-history
-
+    - ~/.config
+    
 - shell:
   - [touch ~/.hushlogin, Add .hushlogin]
   - [chsh -s $(which zsh), Making zsh the default shell]
