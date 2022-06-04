@@ -30,5 +30,5 @@
   - [git submodule update --init --recursive, Installing submodules]
   - [git config --global pull.rebase false, Set merge strategy]
   - [eval "$(/opt/homebrew/bin/brew shellenv)"]
-  - [curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash, Install nvm]
+  - [brew install asdf, Install asdf]
   - [brew install starship]
