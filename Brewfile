@@ -1,5 +1,6 @@
 brew "starship"
 brew "awscli"
+brew "jq"
 # brew "visual-studio-code"
 # brew "gh"
 # brew "zoom"
