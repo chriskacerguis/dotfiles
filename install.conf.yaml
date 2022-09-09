@@ -19,14 +19,17 @@
     ~/.zprofile:
       force: true
       path: zprofile
-      
+    ~/.tool-versions:
+      force: true
+      path: zprofile
+
 - create:
     - ~/Projects
     - ~/.vim/undo-history
     
 - shell:
   - [touch ~/.hushlogin, Add .hushlogin]
-  - [git submodule update --init --recursive, Installing submodules]
   - [eval "$(/opt/homebrew/bin/brew shellenv)"]
   - [brew install asdf, Install asdf]
+  - [asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git, Install asdf-node]
   - [brew install starship]
