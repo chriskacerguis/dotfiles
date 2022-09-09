@@ -11,7 +11,7 @@ brew install dotbot
 
 ```shell
 git clone https://github.com/chriskacerguis/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles && ./install
+dotbot -d ~/.dotfiles -c ~/.dotfiles/install.conf.yaml 
 ```
 
 ### For NodeJS
