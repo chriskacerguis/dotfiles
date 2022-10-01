@@ -30,6 +30,7 @@
 - shell:
   - [touch ~/.hushlogin, Add .hushlogin]
   - [eval "$(/opt/homebrew/bin/brew shellenv)"]
+  - [brew install asdf, Install ASDF]
   - [asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git, Install asdf-node]
   - [asdf install nodejs, Install NodeJS]
   - [asdf global nodejs, Set NodeJS global]
