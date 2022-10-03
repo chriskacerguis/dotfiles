@@ -21,7 +21,7 @@
       path: zprofile
     ~/.tool-versions:
       force: true
-      path: zprofile
+      path: tool-versions
 
 - create:
     - ~/Projects
