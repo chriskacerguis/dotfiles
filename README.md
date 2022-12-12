@@ -29,3 +29,9 @@ dotbot -d ~/.dotfiles -c ~/.dotfiles/install.conf.yaml
 asdf install nodejs latest
 asdf global nodejs latest
 ```
+
+### For NodeJS
+```shell
+asdf install golang latest
+asdf global golang latest
+```
