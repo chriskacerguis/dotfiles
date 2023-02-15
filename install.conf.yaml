@@ -24,7 +24,7 @@
       path: tool-versions
 
 - create:
-    - ~/Projects
+    - ~/Developer
     - ~/.vim/undo-history
     
 - shell:
