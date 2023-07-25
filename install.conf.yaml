@@ -10,6 +10,7 @@
       force: true
       path: gitconfig
     ~/.gitignore: gitignore
+    ~/.hushlogin: hushlogin
     ~/.zshenv:
       force: true
       path: zshenv
@@ -25,8 +26,8 @@
     - ~/.vim/undo-history
     
 - shell:
-  - [touch ~/.hushlogin, Add .hushlogin]
   - [eval "$(/opt/homebrew/bin/brew shellenv)"]
-  - [curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash, Install NVM]
   - [brew install starship, Install Starship Prompt]
   - [eval "$(starship init zsh)"]
+  - [curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash, Install NVM]
+  - [$HOME/.nvm/nvm.sh]
