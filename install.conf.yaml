@@ -19,9 +19,6 @@
     ~/.zprofile:
       force: true
       path: zprofile
-    ~/.tool-versions:
-      force: true
-      path: tool-versions
 
 - create:
     - ~/Developer
