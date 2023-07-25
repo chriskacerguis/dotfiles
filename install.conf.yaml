@@ -22,8 +22,9 @@
       path: zprofile
 
 - create:
-    - ~/Developer
-    - ~/.vim/undo-history
+    ~/Developer
+      mode: 0700
+    ~/.vim/undo-history
     
 - shell:
   - [eval "$(/opt/homebrew/bin/brew shellenv)"]
