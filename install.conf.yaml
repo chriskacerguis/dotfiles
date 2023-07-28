@@ -23,7 +23,7 @@
 
 - create:
     ~/Developer
-      mode: 0700
+     mode: 0700
     ~/.vim/undo-history
     
 - shell:
