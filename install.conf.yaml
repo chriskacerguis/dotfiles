@@ -22,14 +22,13 @@
       path: zprofile
 
 - create:
-    ~/Developer
-     mode: 0700
-    ~/.vim/undo-history
-    
+    - ~/Developer
+    - ~/.vim/undo-history
+
 - shell:
-  - [eval "$(/opt/homebrew/bin/brew shellenv)"]
+  - [chmod 700 ~/Developer]
   - [brew install starship, Install Starship Prompt]
   - [eval "$(starship init zsh)"]
   - [curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash, Install NVM]
-  - [$HOME/.nvm/nvm.sh]
+  - [sh $HOME/.nvm/nvm.sh]
   - [brew install go-task]
