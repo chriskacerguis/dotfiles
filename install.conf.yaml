@@ -20,8 +20,8 @@
     ~/.zprofile:
       force: true
       path: zprofile
-
     ~/.config/starship.toml:
+      create: true
       force: true
       path: starship.toml
 

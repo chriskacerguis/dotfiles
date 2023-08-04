@@ -1,6 +1,6 @@
 [user]
-  name = Chris Kacerguis
-  email = 2414647+chriskacerguis@users.noreply.github.com
+	name = Chris Kacerguis
+	email = 2414647+chriskacerguis@users.noreply.github.com
 [core]
   editor = vi
   excludesfile = ~/.gitignore
