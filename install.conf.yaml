@@ -33,7 +33,7 @@
   - [chmod 700 ~/Developer]
   - [brew install starship, Install Starship Prompt]
   - [eval "$(starship init zsh)"]
-  - [curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash, Install NVM]
+  - [curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash, Install NVM]
   - [sh $HOME/.nvm/nvm.sh]
   - [brew install go-task]
   - [git config --global user.email "2414647+chriskacerguis@users.noreply.github.com"]
