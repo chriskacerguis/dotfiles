@@ -38,3 +38,5 @@
   - [brew install go-task]
   - [git config --global user.email "2414647+chriskacerguis@users.noreply.github.com"]
   - [git config --global user.name "Chris Kacerguis"] 
+  - [nvm install --lts]
+  - [nvm use --lts] 
