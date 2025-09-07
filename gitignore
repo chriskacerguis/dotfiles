@@ -1,4 +1,6 @@
-*.DS_Store
-*.LSOverride
-Thumbs.db
-.bundle
+.DS_Store
+*.sw[nop]
+.env
+.git/
+db/*.sqlite3
+log/*.log
