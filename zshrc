@@ -15,6 +15,9 @@ if [ -d "/opt/homebrew/opt/ruby/bin" ]; then
   export PATH=`gem environment gemdir`/bin:$PATH
 fi
 
+# Put libpq in path
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
 # Delete a given line number in the known_hosts file.
 knownrm() {
  re='^[0-9]+$'
