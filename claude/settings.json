@@ -3,10 +3,10 @@
   "model": "claude-sonnet-4-6",
   "permissions": {
     "allow": [
-      "Bash(npm run *)",
+      "Bash(npm *)",
+      "Bash(node *)",
       "Bash(find *)",
-      "Bash(git status)",
-      "Bash(git diff *)",
+      "Bash(git *)",
       "Read",
       "Write",
       "Edit"
