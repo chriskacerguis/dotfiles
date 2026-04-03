@@ -296,3 +296,4 @@ module.exports = {
 - **Small surface area:** Keep modules focused. A file that does two things should probably be two files.
 - **Standard HTTP semantics:** Use correct status codes, consistent response shapes (`{ data: ... }` for success, `{ error: { message } }` for failures).
 - **No console.log anywhere:** Use the shared pino logger for all output — `console.*` calls are never acceptable in application code.
+- **conventional commits:** Use conventional commits for any git commit messages
