@@ -24,14 +24,14 @@
       create: true
       force: true
       path: starship.toml
-    ~/.claud/CLAUD.md:
+    ~/.claude/CLAUDE.md:
       create: true
       force: true
-      path: CLAUD.md
-    ~/.claud/settings.json:
+      path: claude/CLAUDE.md
+    ~/.claude/settings.json:
       create: true
       force: true
-      path: claud-settings.json
+      path: claude/settings.json
 
 - create:
     - ~/Developer
