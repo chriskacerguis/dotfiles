@@ -4,3 +4,4 @@
 .git/
 db/*.sqlite3
 log/*.log
+**/.claude/settings.local.json

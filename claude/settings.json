@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "claude-sonnet-4-6",
+  "model": "opus",
   "permissions": {
     "allow": [
       "Bash(npm *)",
@@ -14,7 +14,7 @@
     "deny": [
       "Bash(rm -rf *)",
       "Bash(curl *)",
-      "Read(./.env)",
+      "Read(./.env)"
     ]
   }
 }
