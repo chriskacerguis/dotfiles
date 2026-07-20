@@ -1,12 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "opus",
   "permissions": {
     "allow": [
       "Bash(npm *)",
       "Bash(node *)",
+      "Bash(npx jest*)",
       "Bash(find *)",
       "Bash(git *)",
+      "Bash(grep *)",
+      "Bash(echo *)",
+      "Bash(cat *)",
+      "Bash(for:*)",
+      "Bash(awk:*)",
+      "Bash(cd:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
       "Read",
       "Write",
       "Edit"
@@ -16,5 +24,7 @@
       "Bash(curl *)",
       "Read(./.env)"
     ]
-  }
+  },
+  "effortLevel": "high",
+  "model": "opus[1m]"
 }
