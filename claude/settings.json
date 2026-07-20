@@ -2,26 +2,25 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(npm *)",
-      "Bash(node *)",
-      "Bash(npx jest*)",
-      "Bash(find *)",
-      "Bash(git *)",
-      "Bash(grep *)",
-      "Bash(echo *)",
-      "Bash(cat *)",
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(find:*)",
+      "Bash(git:*)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
       "Bash(for:*)",
       "Bash(awk:*)",
       "Bash(cd:*)",
       "Bash(ls:*)",
-      "Bash(find:*)",
       "Read",
       "Write",
       "Edit"
     ],
     "deny": [
-      "Bash(rm -rf *)",
-      "Bash(curl *)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
       "Read(./.env)"
     ]
   },
