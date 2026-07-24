@@ -32,6 +32,11 @@
       create: true
       force: true
       path: claude/settings.json
+    ~/.claude/skills:
+      create: true
+      force: true
+      path: ~/.claude/skills
+
 
 - create:
     - ~/Developer
