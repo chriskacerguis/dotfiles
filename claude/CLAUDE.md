@@ -3,10 +3,17 @@
 ## Core Stack
 
 - **Runtime:** Node.js (plain JavaScript — no TypeScript)
-- **Framework:** Express.js
+- **Backend:** Express.js — **pure REST API only** (JSON in, JSON out; no server-rendered views or templates)
+- **Frontend:** React with reusable components, bundled with Vite
+- **Routing:** `react-router-dom`
 - **Database:** PostgreSQL
-- **UI:** Tailwind CSS / Tailwind UI components and design patterns
+- **UI:** Tailwind CSS utility classes, Radix UI primitives, `lucide-react` icons
 - **Logging:** pino + pino-http
+- **Tests:** Vitest (+ `supertest` for the API, `@testing-library/react` for the UI)
+
+The backend and frontend are cleanly separated: the Express app exposes a REST API, and the
+React SPA (in `frontend/`) is a standalone client that consumes it over HTTP. The two share no
+code.
 
 ---
 
@@ -23,37 +30,54 @@
 
 ## Project Structure
 
-Every project follows this layout:
+The backend lives at the repo root (`src/`); the React SPA is a nested `frontend/` package with
+its own `package.json`. The root `package.json` runs and tests the backend and delegates to the
+frontend via `frontend:*` scripts. Tests are **colocated** next to source (`Foo.test.js(x)`).
 
 ```
 project-root/
-├── src/
+├── src/                    # Express REST API — no views, JSON only
 │   ├── app.js              # Express app setup (no server.listen here)
 │   ├── server.js           # Entry point — binds port, starts server
+│   ├── instrument.js       # Observability init (e.g. Sentry), imported first
 │   ├── config/
 │   │   └── index.js        # All env/config loaded from process.env
 │   ├── db/
 │   │   ├── index.js        # pg Pool setup and export
 │   │   └── migrations/     # SQL migration files (numbered, sequential)
-│   ├── middleware/
-│   │   └── *.js            # Auth, error handling, validation, logging, etc.
-│   ├── routes/
-│   │   └── *.js            # One file per resource/domain
-│   ├── controllers/
-│   │   └── *.js            # Route handler logic, one per resource
-│   ├── services/
-│   │   └── *.js            # Business logic, decoupled from HTTP layer
-│   ├── models/
-│   │   └── *.js            # Data access / query functions (no ORM)
-│   ├── utils/
-│   │   └── *.js            # Pure helper functions
+│   ├── middleware/         # Auth, error handling, validation, rate limiting
+│   ├── routes/             # One file per resource/domain
+│   ├── controllers/        # Route handler logic, one per resource
+│   ├── services/           # Business logic, decoupled from HTTP layer
+│   ├── models/             # Data access / query functions (no ORM)
+│   ├── cache/              # Redis / caching helpers
+│   ├── jobs/               # Scheduled / background jobs (node-cron runner)
+│   ├── storage/            # File / object storage (e.g. S3) adapters
+│   ├── lib/                # Shared internal libraries
+│   ├── utils/              # Pure helper functions
 │   └── logger.js           # Shared pino instance
-├── public/                 # Static assets (if applicable)
-├── views/                  # Templates (if applicable)
-├── tests/
+├── frontend/               # React SPA — consumes the REST API
+│   ├── src/
+│   │   ├── main.jsx        # App entry — mounts <App> into #root
+│   │   ├── App.jsx         # Root component + react-router routes
+│   │   ├── instrument.js   # Frontend observability init
+│   │   ├── index.css       # Tailwind entry
+│   │   ├── components/     # Reusable, presentational components (+ colocated tests)
+│   │   ├── layouts/        # Route-level shells (AdminLayout, AuthLayout, …)
+│   │   ├── pages/          # Route views, grouped by domain (admin/, auth/, …)
+│   │   ├── contexts/       # React context providers (Auth, Toast, …)
+│   │   └── lib/            # api.js client, cn(), formatters, variant maps
+│   ├── index.html          # Vite entry HTML
+│   ├── vite.config.js
+│   ├── vitest.config.js
+│   └── package.json
+├── public/                 # Static assets + built SPA served by Express
+├── scripts/                # Migrations, admin tooling, codegen
+├── tests/                  # Backend integration tests (supertest)
+├── vitest.config.js        # Backend test config
 ├── .env.example
 ├── .gitignore
-└── package.json
+└── package.json            # Backend deps + start/dev/test + frontend:* scripts
 ```
 
 **Routing registration pattern** — routes are mounted in `app.js`, never scattered:
@@ -267,15 +291,94 @@ module.exports = {
 
 ---
 
-## Tailwind UI / Frontend
+## Frontend (React)
 
-- Use Tailwind CSS utility classes — no custom CSS unless absolutely unavoidable
-- Follow Tailwind UI component patterns: consistent spacing, color, and typography scales
-- Use semantic HTML with Tailwind utility classes applied directly
-- Component-level class groupings should follow Tailwind UI's layout-first order:
-  `display → position → sizing → spacing → typography → color → border → effects`
-- Prefer Tailwind UI's headless patterns for interactive components
-- Dark mode support via Tailwind's `dark:` variant where relevant
+The frontend is a standalone React SPA in `frontend/`, bundled with Vite and routed with
+`react-router-dom`. It talks to the backend exclusively over the REST API — no shared code with
+the server, no server-rendered HTML.
+
+### Components
+
+- Build the UI from small, **reusable components** — one thing rendered well, composed into
+  pages. If markup appears twice, extract a component.
+- Use **function components with hooks** — never class components.
+- `components/` holds reusable, presentational pieces (buttons, cards, tables, form fields).
+  They take data and callbacks via props and hold no fetching or route logic.
+- `layouts/` holds route-level shells (nav, sidebar, page chrome) that wrap routed pages.
+- `pages/` holds route views, grouped by domain (`admin/`, `auth/`, …); pages own data fetching
+  and compose components + layouts.
+- `contexts/` holds cross-cutting React context providers (auth, toasts, etc.).
+- Build interactive primitives (dialogs, dropdowns, tabs, selects) on **Radix UI**; use
+  `lucide-react` for icons.
+
+### Styling (Tailwind + `cn` + variants)
+
+- Style with Tailwind utility classes applied directly in JSX via `className`.
+- Compose conditional classes with the `cn()` helper (`clsx` + `tailwind-merge`), never string
+  concatenation:
+  ```js
+  // frontend/src/lib/utils.js
+  import clsx from 'clsx';
+  import { twMerge } from 'tailwind-merge';
+
+  export function cn(...inputs) {
+    return twMerge(clsx(inputs));
+  }
+  ```
+- Express component style variants with `class-variance-authority` (`cva`). Keep value→variant
+  mappings (status colors, role badges, etc.) in dedicated modules in `lib/`, not inline ternaries
+  scattered across pages — recoloring a state happens in one place.
+- No custom CSS unless unavoidable; class order stays layout-first:
+  `display → position → sizing → spacing → typography → color → border → effects`.
+- Dark mode via Tailwind's `dark:` variant where relevant.
+
+### Data fetching
+
+- All network access goes through the single **`lib/api.js`** client — never call `fetch`
+  inline in a component. It owns the base URL, JSON parsing, CSRF handling, and error mapping,
+  and exposes an `api` object (`api.get`, `api.post`, …) plus an `ApiError` class.
+- Responses use the standard envelope: unwrap `{ data }` on success; throw a typed `ApiError`
+  carrying the status and `{ error: { message } }` on failure.
+- Consume the client from components via hooks (`useEffect`/`useState` or a context provider),
+  handling `loading` / `error` / `data` states explicitly.
+
+```js
+// frontend/src/lib/api.js (shape)
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function request(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    credentials: 'same-origin',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new ApiError(payload?.error?.message ?? `Request failed: ${res.status}`, res.status);
+  }
+  return payload.data;
+}
+
+export const api = {
+  get: (path) => request('GET', path),
+  post: (path, body) => request('POST', path, body),
+  put: (path, body) => request('PUT', path, body),
+  del: (path) => request('DELETE', path),
+};
+```
+
+### Build & tooling
+
+- Bundle with Vite; the dev server proxies API routes to the Express backend.
+- Production build is emitted into the backend's `public/` and served by Express.
+- Frontend config comes from Vite env vars (`import.meta.env.VITE_*`) — never hardcoded.
+- Tests are colocated (`Component.test.jsx`) and run with Vitest + `@testing-library/react`.
 
 ---
 
@@ -283,7 +386,22 @@ module.exports = {
 
 - All config loaded from environment variables — never hardcoded
 - Always provide a `.env.example` with all required keys documented
-- Config is centralized in `src/config/index.js` — other modules import from there, not directly from `process.env`
+- **Backend:** config is centralized in `src/config/index.js` — other modules import
+  from there, not directly from `process.env`
+- **Frontend:** config comes from Vite env vars (`import.meta.env.VITE_*`), documented in
+  `frontend/.env.example`
+
+---
+
+## Testing
+
+- Use **Vitest** for both backend and frontend.
+- **Backend:** unit-test services/models/utils in isolation; test the HTTP layer end-to-end with
+  `supertest` against the Express app. Backend integration tests live in `tests/`.
+- **Frontend:** test components and hooks with `@testing-library/react`; assert on behavior and
+  rendered output, not implementation details.
+- **Colocate** unit tests next to the code they cover (`foo.js` → `foo.test.js`).
+- Run everything with the root `npm test` (backend then frontend).
 
 ---
 
