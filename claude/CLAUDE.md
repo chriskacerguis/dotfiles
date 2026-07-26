@@ -46,6 +46,7 @@ project-root/
 │   │   ├── index.js        # pg Pool setup and export
 │   │   └── migrations/     # SQL migration files (numbered, sequential)
 │   ├── middleware/         # Auth, error handling, validation, rate limiting
+│   ├── schemas/            # JSON Schema per resource — validates requests AND generates the spec
 │   ├── routes/             # One file per resource/domain
 │   ├── controllers/        # Route handler logic, one per resource
 │   ├── services/           # Business logic, decoupled from HTTP layer
@@ -71,6 +72,8 @@ project-root/
 │   ├── vite.config.js
 │   ├── vitest.config.js
 │   └── package.json
+├── docs/
+│   └── openapi.yaml        # Generated OpenAPI 3.1 spec — never hand-edited, committed
 ├── public/                 # Static assets + built SPA served by Express
 ├── scripts/                # Migrations, admin tooling, codegen
 ├── tests/                  # Backend integration tests (supertest)
@@ -205,6 +208,84 @@ const err = new Error('User not found');
 err.status = 404;
 throw err;
 ```
+
+---
+
+## API Documentation (OpenAPI)
+
+Every project **must** have an OpenAPI 3.1 spec, and it must always be current — this is not
+optional and does not need to be asked for.
+
+The spec is **generated from the request/response schemas the API already validates against**, so
+it cannot drift from the code. It is not hand-written prose, and it is not scraped out of
+JSDoc/decorator comments — comments lie, runtime schemas don't.
+
+### The pipeline
+
+1. **Schemas are the source of truth.** Each route declares plain **JSON Schema** objects for its
+   params, query, body, and responses in `src/schemas/<resource>.js`.
+2. **The same schemas enforce requests at runtime** via the `validate` middleware (ajv). If a
+   schema is wrong, tests fail — which is what keeps the docs honest.
+3. **`npm run openapi:generate`** walks the route table + schemas and writes `docs/openapi.yaml`.
+4. The generated spec **is committed**, so API changes show up as a reviewable diff in the PR.
+
+```js
+// src/schemas/users.js
+const userResponse = {
+  type: 'object',
+  required: ['id', 'email', 'createdAt'],
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    email: { type: 'string', format: 'email' },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+};
+
+const listUsers = {
+  summary: 'List users',
+  query: {
+    type: 'object',
+    properties: {
+      limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
+      offset: { type: 'integer', minimum: 0, default: 0 },
+    },
+  },
+  responses: {
+    200: { type: 'array', items: userResponse },
+  },
+};
+
+module.exports = { userResponse, listUsers };
+```
+
+```js
+// src/routes/users.js
+const router = require('express').Router();
+const validate = require('../middleware/validate');
+const schemas = require('../schemas/users');
+const usersController = require('../controllers/users');
+
+router.get('/', validate(schemas.listUsers), usersController.list);
+
+module.exports = router;
+```
+
+### Rules
+
+- Response schemas describe the **payload inside the envelope** — the generator wraps them in
+  `{ data: ... }` for success and the shared `{ error: { message } }` for failures automatically.
+- Declare every response an endpoint can actually return (`400`, `401`, `403`, `404`, `409`, `500`),
+  not just the happy path. Common error responses come from shared components.
+- Reuse schema objects rather than redefining shapes per route; the generator emits them once
+  under `components/schemas` and `$ref`s them.
+- **CI enforces freshness:** re-run the generator and fail if `docs/openapi.yaml` has a diff
+  (`npm run openapi:generate && git diff --exit-code docs/openapi.yaml`). Also lint the spec for
+  validity.
+- **CI enforces coverage:** a contract test asserts every route registered on the Express app
+  appears in the spec — an undocumented endpoint is a failing build, not a TODO.
+- Serve the spec from the API (`GET /api/openapi.yaml`) and expose a rendered reference outside
+  production.
+- Never hand-edit `docs/openapi.yaml` — change the schema and regenerate.
 
 ---
 
@@ -413,5 +494,6 @@ export const api = {
 - **Explicit over implicit:** Prefer clear, readable code over clever one-liners.
 - **Small surface area:** Keep modules focused. A file that does two things should probably be two files.
 - **Standard HTTP semantics:** Use correct status codes, consistent response shapes (`{ data: ... }` for success, `{ error: { message } }` for failures).
+- **Always document the API:** `docs/openapi.yaml` is generated from the route validation schemas and committed. CI fails on drift or on an undocumented route — the docs can never go stale.
 - **No console.log anywhere:** Use the shared pino logger for all output — `console.*` calls are never acceptable in application code.
 - **conventional commits:** Use conventional commits for any git commit messages
