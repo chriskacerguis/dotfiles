@@ -1,5 +1,29 @@
 # Global Claude Code Instructions
 
+## Skills
+
+Two skills carry the detailed standards for the two domains I work in most. **Invoke the
+skill before writing code in its domain** — do not reconstruct its rules from memory, and do
+not restate them here.
+
+| Skill | Invoke whenever the work touches… |
+|---|---|
+| **`rest-api`** | Any HTTP endpoint: adding/changing/reviewing a route, controller, service, model, schema, status code, pagination, error shape, or `docs/openapi.yaml`. |
+| **`ui-design`** | Any user-facing surface: a page, layout, component, form, table, badge, modal, or "make this look right" styling pass. |
+
+Rules:
+
+- The skill is the **authority in its domain**. Where this file and a skill disagree on a
+  detail the skill covers, the skill wins; this file only records project-shape deltas
+  (noted inline below).
+- Load the skill's `references/` files when the task calls for them — `http-semantics.md`
+  and `openapi-pipeline.md` for API work, `components.md` for UI work.
+- The skills' `assets/` are working, copy-in implementations. Prefer copying and adapting
+  them over writing an equivalent from scratch.
+- Run the `rest-api` endpoint checklist before declaring any API change done.
+
+---
+
 ## Core Stack
 
 - **Runtime:** Node.js (plain JavaScript — no TypeScript)
@@ -54,7 +78,7 @@ project-root/
 │   ├── cache/              # Redis / caching helpers
 │   ├── jobs/               # Scheduled / background jobs (node-cron runner)
 │   ├── storage/            # File / object storage (e.g. S3) adapters
-│   ├── lib/                # Shared internal libraries
+│   ├── lib/                # Shared internal libraries (apiRouter, errors, openapi)
 │   ├── utils/              # Pure helper functions
 │   └── logger.js           # Shared pino instance
 ├── frontend/               # React SPA — consumes the REST API
@@ -83,209 +107,27 @@ project-root/
 └── package.json            # Backend deps + start/dev/test + frontend:* scripts
 ```
 
-**Routing registration pattern** — routes are mounted in `app.js`, never scattered:
-
-```js
-// src/app.js
-const express = require('express');
-const pinoHttp = require('pino-http');
-const logger = require('./logger');
-const app = express();
-
-app.use(express.json());
-app.use(pinoHttp({ logger }));
-
-app.use('/api/users', require('./routes/users'));
-app.use('/api/orders', require('./routes/orders'));
-
-app.use(require('./middleware/errorHandler'));
-
-module.exports = app;
-```
-
 ---
 
-## Express Patterns
+## Backend / REST API
 
-### Routes
+→ **Use the `rest-api` skill.** It owns the layer contracts, the request lifecycle, the
+schema format, the DRY table, and the OpenAPI pipeline with its CI gates. What follows is
+the summary, not a substitute for loading it.
 
-Thin — delegate immediately to the controller:
-
-```js
-// src/routes/users.js
-const router = require('express').Router();
-const usersController = require('../controllers/users');
-
-router.get('/', usersController.list);
-router.get('/:id', usersController.get);
-router.post('/', usersController.create);
-router.put('/:id', usersController.update);
-router.delete('/:id', usersController.remove);
-
-module.exports = router;
-```
-
-### Controllers
-
-Handle HTTP concerns only (req/res). All business logic lives in services:
-
-```js
-// src/controllers/users.js
-const usersService = require('../services/users');
-
-async function list(req, res, next) {
-  try {
-    const users = await usersService.listUsers(req.query);
-    res.json({ data: users });
-  } catch (err) {
-    next(err);
-  }
-}
-
-module.exports = { list, get, create, update, remove };
-```
-
-### Services
-
-Contain business logic. Call models for data access. No `req`/`res` references:
-
-```js
-// src/services/users.js
-const usersModel = require('../models/users');
-
-async function listUsers(filters = {}) {
-  return usersModel.findAll(filters);
-}
-
-module.exports = { listUsers };
-```
-
-### Models
-
-Raw SQL queries only via `pg`. No ORM:
-
-```js
-// src/models/users.js
-const db = require('../db');
-
-async function findAll({ limit = 50, offset = 0 } = {}) {
-  const { rows } = await db.query(
-    'SELECT * FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2',
-    [limit, offset]
-  );
-  return rows;
-}
-
-module.exports = { findAll };
-```
-
-### Error Handling
-
-Centralized error middleware — always the last middleware registered:
-
-```js
-// src/middleware/errorHandler.js
-const logger = require('../logger');
-
-function errorHandler(err, req, res, next) {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
-
-  if (status >= 500) {
-    logger.error({ err }, 'Unhandled server error');
-  }
-
-  res.status(status).json({ error: { message } });
-}
-
-module.exports = errorHandler;
-```
-
-Throw errors from any layer using a consistent shape:
-
-```js
-const err = new Error('User not found');
-err.status = 404;
-throw err;
-```
-
----
-
-## API Documentation (OpenAPI)
-
-Every project **must** have an OpenAPI 3.1 spec, and it must always be current — this is not
-optional and does not need to be asked for.
-
-The spec is **generated from the request/response schemas the API already validates against**, so
-it cannot drift from the code. It is not hand-written prose, and it is not scraped out of
-JSDoc/decorator comments — comments lie, runtime schemas don't.
-
-### The pipeline
-
-1. **Schemas are the source of truth.** Each route declares plain **JSON Schema** objects for its
-   params, query, body, and responses in `src/schemas/<resource>.js`.
-2. **The same schemas enforce requests at runtime** via the `validate` middleware (ajv). If a
-   schema is wrong, tests fail — which is what keeps the docs honest.
-3. **`npm run openapi:generate`** walks the route table + schemas and writes `docs/openapi.yaml`.
-4. The generated spec **is committed**, so API changes show up as a reviewable diff in the PR.
-
-```js
-// src/schemas/users.js
-const userResponse = {
-  type: 'object',
-  required: ['id', 'email', 'createdAt'],
-  properties: {
-    id: { type: 'string', format: 'uuid' },
-    email: { type: 'string', format: 'email' },
-    createdAt: { type: 'string', format: 'date-time' },
-  },
-};
-
-const listUsers = {
-  summary: 'List users',
-  query: {
-    type: 'object',
-    properties: {
-      limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
-      offset: { type: 'integer', minimum: 0, default: 0 },
-    },
-  },
-  responses: {
-    200: { type: 'array', items: userResponse },
-  },
-};
-
-module.exports = { userResponse, listUsers };
-```
-
-```js
-// src/routes/users.js
-const router = require('express').Router();
-const validate = require('../middleware/validate');
-const schemas = require('../schemas/users');
-const usersController = require('../controllers/users');
-
-router.get('/', validate(schemas.listUsers), usersController.list);
-
-module.exports = router;
-```
-
-### Rules
-
-- Response schemas describe the **payload inside the envelope** — the generator wraps them in
-  `{ data: ... }` for success and the shared `{ error: { message } }` for failures automatically.
-- Declare every response an endpoint can actually return (`400`, `401`, `403`, `404`, `409`, `500`),
-  not just the happy path. Common error responses come from shared components.
-- Reuse schema objects rather than redefining shapes per route; the generator emits them once
-  under `components/schemas` and `$ref`s them.
-- **CI enforces freshness:** re-run the generator and fail if `docs/openapi.yaml` has a diff
-  (`npm run openapi:generate && git diff --exit-code docs/openapi.yaml`). Also lint the spec for
-  validity.
-- **CI enforces coverage:** a contract test asserts every route registered on the Express app
-  appears in the spec — an undocumented endpoint is a failing build, not a TODO.
-- Serve the spec from the API (`GET /api/openapi.yaml`) and expose a rendered reference outside
-  production.
-- Never hand-edit `docs/openapi.yaml` — change the schema and regenerate.
+- Every HTTP surface is resource-oriented REST. URLs name nouns; methods carry the verb.
+- One envelope, always: `{ data: ... }` on success, `{ error: { message } }` on failure,
+  no body on `204`.
+- Layers do one job each: `routes` wire → `controllers` speak HTTP → `services` hold
+  business logic → `models` hold parameterized SQL. `req`/`res` never appear below the
+  controller.
+- Routers are mounted in exactly one place, `src/app.js`. The error middleware is always
+  registered last and is the only thing that formats a failure.
+- Errors are **thrown** as typed errors from any layer, never returned.
+- **Every project ships an OpenAPI 3.1 spec generated from the same JSON Schemas that
+  validate requests at runtime.** This is not optional and does not need to be asked for.
+  Never hand-edit `docs/openapi.yaml` — change the schema and regenerate. CI fails on
+  drift, on an undocumented route, and on an invalid spec.
 
 ---
 
@@ -293,7 +135,8 @@ module.exports = router;
 
 - Use the `pg` package with a shared connection pool
 - Never use an ORM (no Sequelize, Prisma, etc.)
-- All queries use parameterized placeholders (`$1`, `$2`, …) — never string interpolation
+- All queries use parameterized placeholders (`$1`, `$2`, …) — never string interpolation,
+  not even for a column sort (allowlist those instead)
 - Schema managed with sequential numbered SQL migration files
 
 ```js
@@ -306,15 +149,6 @@ const pool = new Pool({ connectionString: config.databaseUrl });
 module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
-};
-```
-
-```js
-// src/config/index.js
-module.exports = {
-  port: process.env.PORT || 3000,
-  databaseUrl: process.env.DATABASE_URL,
-  nodeEnv: process.env.NODE_ENV || 'development',
 };
 ```
 
@@ -344,18 +178,6 @@ const logger = pino({
 module.exports = logger;
 ```
 
-Add `logLevel` to config:
-
-```js
-// src/config/index.js (updated)
-module.exports = {
-  port: process.env.PORT || 3000,
-  databaseUrl: process.env.DATABASE_URL,
-  nodeEnv: process.env.NODE_ENV || 'development',
-  logLevel: process.env.LOG_LEVEL || 'info',
-};
-```
-
 **Usage rules:**
 
 - Import the shared logger — never instantiate a new pino instance per-file
@@ -378,6 +200,22 @@ The frontend is a standalone React SPA in `frontend/`, bundled with Vite and rou
 `react-router-dom`. It talks to the backend exclusively over the REST API — no shared code with
 the server, no server-rendered HTML.
 
+### Look and feel
+
+→ **Use the `ui-design` skill** for anything visual. It owns the design tokens (accent,
+gray ramp, radii, shadows, container, type scale), the semantic status palette, the page
+skeleton, and the copy-paste component recipes in its `references/components.md`.
+
+The skill is engine-agnostic; its Tailwind classes port to JSX unchanged. Three
+project-level deltas apply when adopting it into a React SPA:
+
+- **Icons:** use `lucide-react` components, not the skill's icon font.
+- **Interactivity:** build dialogs, dropdowns, tabs, and selects on **Radix UI** primitives
+  instead of copying the skill's `assets/app.js` data-attribute layer — that asset is for
+  server-rendered templates. The skill's *classes* still apply to the Radix markup.
+- **Class composition:** the skill's recipes are literal class strings; in React, compose
+  them with `cn()` and express variants with `class-variance-authority` (below).
+
 ### Components
 
 - Build the UI from small, **reusable components** — one thing rendered well, composed into
@@ -389,10 +227,8 @@ the server, no server-rendered HTML.
 - `pages/` holds route views, grouped by domain (`admin/`, `auth/`, …); pages own data fetching
   and compose components + layouts.
 - `contexts/` holds cross-cutting React context providers (auth, toasts, etc.).
-- Build interactive primitives (dialogs, dropdowns, tabs, selects) on **Radix UI**; use
-  `lucide-react` for icons.
 
-### Styling (Tailwind + `cn` + variants)
+### Styling mechanics
 
 - Style with Tailwind utility classes applied directly in JSX via `className`.
 - Compose conditional classes with the `cn()` helper (`clsx` + `tailwind-merge`), never string
@@ -407,11 +243,11 @@ the server, no server-rendered HTML.
   }
   ```
 - Express component style variants with `class-variance-authority` (`cva`). Keep value→variant
-  mappings (status colors, role badges, etc.) in dedicated modules in `lib/`, not inline ternaries
-  scattered across pages — recoloring a state happens in one place.
+  mappings (the skill's status palette, role badges, etc.) in dedicated modules in `lib/`, not
+  inline ternaries scattered across pages — recoloring a state happens in one place. Make sure
+  Tailwind's `content` globs cover those modules so the classes survive purging.
 - No custom CSS unless unavoidable; class order stays layout-first:
   `display → position → sizing → spacing → typography → color → border → effects`.
-- Dark mode via Tailwind's `dark:` variant where relevant.
 
 ### Data fetching
 
@@ -472,13 +308,24 @@ export const api = {
 - **Frontend:** config comes from Vite env vars (`import.meta.env.VITE_*`), documented in
   `frontend/.env.example`
 
+```js
+// src/config/index.js
+module.exports = {
+  port: process.env.PORT || 3000,
+  databaseUrl: process.env.DATABASE_URL,
+  nodeEnv: process.env.NODE_ENV || 'development',
+  logLevel: process.env.LOG_LEVEL || 'info',
+};
+```
+
 ---
 
 ## Testing
 
 - Use **Vitest** for both backend and frontend.
 - **Backend:** unit-test services/models/utils in isolation; test the HTTP layer end-to-end with
-  `supertest` against the Express app. Backend integration tests live in `tests/`.
+  `supertest` against the Express app. Backend integration tests live in `tests/`. Every
+  endpoint gets a case per status code its schema claims it can return.
 - **Frontend:** test components and hooks with `@testing-library/react`; assert on behavior and
   rendered output, not implementation details.
 - **Colocate** unit tests next to the code they cover (`foo.js` → `foo.test.js`).
@@ -488,6 +335,7 @@ export const api = {
 
 ## General Principles
 
+- **Use the skills:** `rest-api` for any endpoint work, `ui-design` for any visual work. Load the skill before writing the code, not after — and follow its checklist before calling the work done.
 - **Modularity first:** Every piece of logic should be independently replaceable. If changing one thing requires changing three files in unrelated layers, the structure is wrong.
 - **Fix forward:** Don't hack around problems. Identify the root cause and fix it correctly.
 - **No magic:** Avoid frameworks, libraries, or patterns that obscure what is actually happening.
