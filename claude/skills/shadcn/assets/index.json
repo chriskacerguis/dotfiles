@@ -1,0 +1,723 @@
+{
+	"sections": [
+		{
+			"links": [
+				{
+					"description": "Core principles—Open Code, Composition, Distribution, Beautiful Defaults, and AI-Ready design.",
+					"section": "Overview",
+					"title": "Introduction",
+					"url": "https://ui.shadcn.com/docs"
+				},
+				{
+					"description": "Command-line tool for installing and managing components.",
+					"section": "Overview",
+					"title": "CLI",
+					"url": "https://ui.shadcn.com/docs/cli"
+				},
+				{
+					"description": "Configuration file for customizing the CLI and component installation.",
+					"section": "Overview",
+					"title": "components.json",
+					"url": "https://ui.shadcn.com/docs/components-json"
+				},
+				{
+					"description": "Guide to customizing colors, typography, and design tokens.",
+					"section": "Overview",
+					"title": "Theming",
+					"url": "https://ui.shadcn.com/docs/theming"
+				},
+				{
+					"description": "Release notes and version history.",
+					"section": "Overview",
+					"title": "Changelog",
+					"url": "https://ui.shadcn.com/docs/changelog"
+				},
+				{
+					"description": "Credits and project information.",
+					"section": "Overview",
+					"title": "About",
+					"url": "https://ui.shadcn.com/docs/about"
+				}
+			],
+			"name": "Overview"
+		},
+		{
+			"links": [
+				{
+					"description": "Install shadcn/ui in a Next.js project.",
+					"section": "Installation",
+					"title": "Next.js",
+					"url": "https://ui.shadcn.com/docs/installation/next"
+				},
+				{
+					"description": "Install shadcn/ui in a Vite project.",
+					"section": "Installation",
+					"title": "Vite",
+					"url": "https://ui.shadcn.com/docs/installation/vite"
+				},
+				{
+					"description": "Install shadcn/ui in a Remix project.",
+					"section": "Installation",
+					"title": "Remix",
+					"url": "https://ui.shadcn.com/docs/installation/remix"
+				},
+				{
+					"description": "Install shadcn/ui in an Astro project.",
+					"section": "Installation",
+					"title": "Astro",
+					"url": "https://ui.shadcn.com/docs/installation/astro"
+				},
+				{
+					"description": "Install shadcn/ui in a Laravel project.",
+					"section": "Installation",
+					"title": "Laravel",
+					"url": "https://ui.shadcn.com/docs/installation/laravel"
+				},
+				{
+					"description": "Install shadcn/ui in a Gatsby project.",
+					"section": "Installation",
+					"title": "Gatsby",
+					"url": "https://ui.shadcn.com/docs/installation/gatsby"
+				},
+				{
+					"description": "Install shadcn/ui in a React Router project.",
+					"section": "Installation",
+					"title": "React Router",
+					"url": "https://ui.shadcn.com/docs/installation/react-router"
+				},
+				{
+					"description": "Install shadcn/ui in a TanStack Router project.",
+					"section": "Installation",
+					"title": "TanStack Router",
+					"url": "https://ui.shadcn.com/docs/installation/tanstack-router"
+				},
+				{
+					"description": "Install shadcn/ui in a TanStack Start project.",
+					"section": "Installation",
+					"title": "TanStack Start",
+					"url": "https://ui.shadcn.com/docs/installation/tanstack"
+				},
+				{
+					"description": "Manually install shadcn/ui without the CLI.",
+					"section": "Installation",
+					"title": "Manual Installation",
+					"url": "https://ui.shadcn.com/docs/installation/manual"
+				}
+			],
+			"name": "Installation"
+		},
+		{
+			"links": [],
+			"name": "Components",
+			"subsections": [
+				{
+					"links": [
+						{
+							"description": "Building forms with React Hook Form and Zod validation.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Form",
+							"url": "https://ui.shadcn.com/docs/components/form"
+						},
+						{
+							"description": "Field component for form inputs with labels and error messages.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Field",
+							"url": "https://ui.shadcn.com/docs/components/field"
+						},
+						{
+							"description": "Button component with multiple variants.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Button",
+							"url": "https://ui.shadcn.com/docs/components/button"
+						},
+						{
+							"description": "Group multiple buttons together.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Button Group",
+							"url": "https://ui.shadcn.com/docs/components/button-group"
+						},
+						{
+							"description": "Text input component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Input",
+							"url": "https://ui.shadcn.com/docs/components/input"
+						},
+						{
+							"description": "Input component with prefix and suffix addons.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Input Group",
+							"url": "https://ui.shadcn.com/docs/components/input-group"
+						},
+						{
+							"description": "One-time password input component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Input OTP",
+							"url": "https://ui.shadcn.com/docs/components/input-otp"
+						},
+						{
+							"description": "Multi-line text input component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Textarea",
+							"url": "https://ui.shadcn.com/docs/components/textarea"
+						},
+						{
+							"description": "Checkbox input component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Checkbox",
+							"url": "https://ui.shadcn.com/docs/components/checkbox"
+						},
+						{
+							"description": "Radio button group component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Radio Group",
+							"url": "https://ui.shadcn.com/docs/components/radio-group"
+						},
+						{
+							"description": "Select dropdown component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Select",
+							"url": "https://ui.shadcn.com/docs/components/select"
+						},
+						{
+							"description": "Toggle switch component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Switch",
+							"url": "https://ui.shadcn.com/docs/components/switch"
+						},
+						{
+							"description": "Slider input component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Slider",
+							"url": "https://ui.shadcn.com/docs/components/slider"
+						},
+						{
+							"description": "Calendar component for date selection.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Calendar",
+							"url": "https://ui.shadcn.com/docs/components/calendar"
+						},
+						{
+							"description": "Date picker component combining input and calendar.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Date Picker",
+							"url": "https://ui.shadcn.com/docs/components/date-picker"
+						},
+						{
+							"description": "Searchable select component with autocomplete.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Combobox",
+							"url": "https://ui.shadcn.com/docs/components/combobox"
+						},
+						{
+							"description": "Form label component.",
+							"section": "Components",
+							"subsection": "Form & Input",
+							"title": "Label",
+							"url": "https://ui.shadcn.com/docs/components/label"
+						}
+					],
+					"name": "Form & Input"
+				},
+				{
+					"links": [
+						{
+							"description": "Collapsible accordion component.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Accordion",
+							"url": "https://ui.shadcn.com/docs/components/accordion"
+						},
+						{
+							"description": "Breadcrumb navigation component.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Breadcrumb",
+							"url": "https://ui.shadcn.com/docs/components/breadcrumb"
+						},
+						{
+							"description": "Accessible navigation menu with dropdowns.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Navigation Menu",
+							"url": "https://ui.shadcn.com/docs/components/navigation-menu"
+						},
+						{
+							"description": "Collapsible sidebar component for app layouts.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Sidebar",
+							"url": "https://ui.shadcn.com/docs/components/sidebar"
+						},
+						{
+							"description": "Tabbed interface component.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Tabs",
+							"url": "https://ui.shadcn.com/docs/components/tabs"
+						},
+						{
+							"description": "Visual divider between content sections.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Separator",
+							"url": "https://ui.shadcn.com/docs/components/separator"
+						},
+						{
+							"description": "Custom scrollable area with styled scrollbars.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Scroll Area",
+							"url": "https://ui.shadcn.com/docs/components/scroll-area"
+						},
+						{
+							"description": "Resizable panel layout component.",
+							"section": "Components",
+							"subsection": "Layout & Navigation",
+							"title": "Resizable",
+							"url": "https://ui.shadcn.com/docs/components/resizable"
+						}
+					],
+					"name": "Layout & Navigation"
+				},
+				{
+					"links": [
+						{
+							"description": "Modal dialog component.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Dialog",
+							"url": "https://ui.shadcn.com/docs/components/dialog"
+						},
+						{
+							"description": "Alert dialog for confirmation prompts.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Alert Dialog",
+							"url": "https://ui.shadcn.com/docs/components/alert-dialog"
+						},
+						{
+							"description": "Slide-out panel component (drawer).",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Sheet",
+							"url": "https://ui.shadcn.com/docs/components/sheet"
+						},
+						{
+							"description": "Mobile-friendly drawer component using Vaul.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Drawer",
+							"url": "https://ui.shadcn.com/docs/components/drawer"
+						},
+						{
+							"description": "Floating popover component.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Popover",
+							"url": "https://ui.shadcn.com/docs/components/popover"
+						},
+						{
+							"description": "Tooltip component for additional context.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Tooltip",
+							"url": "https://ui.shadcn.com/docs/components/tooltip"
+						},
+						{
+							"description": "Card that appears on hover.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Hover Card",
+							"url": "https://ui.shadcn.com/docs/components/hover-card"
+						},
+						{
+							"description": "Right-click context menu.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Context Menu",
+							"url": "https://ui.shadcn.com/docs/components/context-menu"
+						},
+						{
+							"description": "Dropdown menu component.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Dropdown Menu",
+							"url": "https://ui.shadcn.com/docs/components/dropdown-menu"
+						},
+						{
+							"description": "Horizontal menubar component.",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Menubar",
+							"url": "https://ui.shadcn.com/docs/components/menubar"
+						},
+						{
+							"description": "Command palette component (cmdk).",
+							"section": "Components",
+							"subsection": "Overlays & Dialogs",
+							"title": "Command",
+							"url": "https://ui.shadcn.com/docs/components/command"
+						}
+					],
+					"name": "Overlays & Dialogs"
+				},
+				{
+					"links": [
+						{
+							"description": "Alert component for messages and notifications.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Alert",
+							"url": "https://ui.shadcn.com/docs/components/alert"
+						},
+						{
+							"description": "Toast notification component using Sonner.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Toast",
+							"url": "https://ui.shadcn.com/docs/components/toast"
+						},
+						{
+							"description": "Progress bar component.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Progress",
+							"url": "https://ui.shadcn.com/docs/components/progress"
+						},
+						{
+							"description": "Loading spinner component.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Spinner",
+							"url": "https://ui.shadcn.com/docs/components/spinner"
+						},
+						{
+							"description": "Skeleton loading placeholder.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Skeleton",
+							"url": "https://ui.shadcn.com/docs/components/skeleton"
+						},
+						{
+							"description": "Badge component for labels and status indicators.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Badge",
+							"url": "https://ui.shadcn.com/docs/components/badge"
+						},
+						{
+							"description": "Empty state component for no data scenarios.",
+							"section": "Components",
+							"subsection": "Feedback & Status",
+							"title": "Empty",
+							"url": "https://ui.shadcn.com/docs/components/empty"
+						}
+					],
+					"name": "Feedback & Status"
+				},
+				{
+					"links": [
+						{
+							"description": "Avatar component for user profiles.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Avatar",
+							"url": "https://ui.shadcn.com/docs/components/avatar"
+						},
+						{
+							"description": "Card container component.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Card",
+							"url": "https://ui.shadcn.com/docs/components/card"
+						},
+						{
+							"description": "Table component for displaying data.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Table",
+							"url": "https://ui.shadcn.com/docs/components/table"
+						},
+						{
+							"description": "Advanced data table with sorting, filtering, and pagination.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Data Table",
+							"url": "https://ui.shadcn.com/docs/components/data-table"
+						},
+						{
+							"description": "Chart components using Recharts.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Chart",
+							"url": "https://ui.shadcn.com/docs/components/chart"
+						},
+						{
+							"description": "Carousel component using Embla Carousel.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Carousel",
+							"url": "https://ui.shadcn.com/docs/components/carousel"
+						},
+						{
+							"description": "Container that maintains aspect ratio.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Aspect Ratio",
+							"url": "https://ui.shadcn.com/docs/components/aspect-ratio"
+						},
+						{
+							"description": "Typography styles and components.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Typography",
+							"url": "https://ui.shadcn.com/docs/components/typography"
+						},
+						{
+							"description": "Generic item component for lists and menus.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Item",
+							"url": "https://ui.shadcn.com/docs/components/item"
+						},
+						{
+							"description": "Keyboard shortcut display component.",
+							"section": "Components",
+							"subsection": "Display & Media",
+							"title": "Kbd",
+							"url": "https://ui.shadcn.com/docs/components/kbd"
+						}
+					],
+					"name": "Display & Media"
+				},
+				{
+					"links": [
+						{
+							"description": "Collapsible container component.",
+							"section": "Components",
+							"subsection": "Misc",
+							"title": "Collapsible",
+							"url": "https://ui.shadcn.com/docs/components/collapsible"
+						},
+						{
+							"description": "Toggle button component.",
+							"section": "Components",
+							"subsection": "Misc",
+							"title": "Toggle",
+							"url": "https://ui.shadcn.com/docs/components/toggle"
+						},
+						{
+							"description": "Group of toggle buttons.",
+							"section": "Components",
+							"subsection": "Misc",
+							"title": "Toggle Group",
+							"url": "https://ui.shadcn.com/docs/components/toggle-group"
+						},
+						{
+							"description": "Pagination component for lists and tables.",
+							"section": "Components",
+							"subsection": "Misc",
+							"title": "Pagination",
+							"url": "https://ui.shadcn.com/docs/components/pagination"
+						}
+					],
+					"name": "Misc"
+				}
+			]
+		},
+		{
+			"links": [
+				{
+					"description": "Overview of dark mode implementation.",
+					"section": "Dark Mode",
+					"title": "Dark Mode",
+					"url": "https://ui.shadcn.com/docs/dark-mode"
+				},
+				{
+					"description": "Dark mode setup for Next.js.",
+					"section": "Dark Mode",
+					"title": "Dark Mode - Next.js",
+					"url": "https://ui.shadcn.com/docs/dark-mode/next"
+				},
+				{
+					"description": "Dark mode setup for Vite.",
+					"section": "Dark Mode",
+					"title": "Dark Mode - Vite",
+					"url": "https://ui.shadcn.com/docs/dark-mode/vite"
+				},
+				{
+					"description": "Dark mode setup for Astro.",
+					"section": "Dark Mode",
+					"title": "Dark Mode - Astro",
+					"url": "https://ui.shadcn.com/docs/dark-mode/astro"
+				},
+				{
+					"description": "Dark mode setup for Remix.",
+					"section": "Dark Mode",
+					"title": "Dark Mode - Remix",
+					"url": "https://ui.shadcn.com/docs/dark-mode/remix"
+				}
+			],
+			"name": "Dark Mode"
+		},
+		{
+			"links": [
+				{
+					"description": "Guide to building forms with shadcn/ui.",
+					"section": "Forms",
+					"title": "Forms Overview",
+					"url": "https://ui.shadcn.com/docs/forms"
+				},
+				{
+					"description": "Using shadcn/ui with React Hook Form.",
+					"section": "Forms",
+					"title": "React Hook Form",
+					"url": "https://ui.shadcn.com/docs/forms/react-hook-form"
+				},
+				{
+					"description": "Using shadcn/ui with TanStack Form.",
+					"section": "Forms",
+					"title": "TanStack Form",
+					"url": "https://ui.shadcn.com/docs/forms/tanstack-form"
+				},
+				{
+					"description": "Building forms in Next.js with Server Actions.",
+					"section": "Forms",
+					"title": "Forms - Next.js",
+					"url": "https://ui.shadcn.com/docs/forms/next"
+				}
+			],
+			"name": "Forms"
+		},
+		{
+			"links": [
+				{
+					"description": "Using shadcn/ui in a monorepo setup.",
+					"section": "Advanced",
+					"title": "Monorepo",
+					"url": "https://ui.shadcn.com/docs/monorepo"
+				},
+				{
+					"description": "React 19 support and migration guide.",
+					"section": "Advanced",
+					"title": "React 19",
+					"url": "https://ui.shadcn.com/docs/react-19"
+				},
+				{
+					"description": "Tailwind CSS v4 support and setup.",
+					"section": "Advanced",
+					"title": "Tailwind CSS v4",
+					"url": "https://ui.shadcn.com/docs/tailwind-v4"
+				},
+				{
+					"description": "Using shadcn/ui with JavaScript (no TypeScript).",
+					"section": "Advanced",
+					"title": "JavaScript",
+					"url": "https://ui.shadcn.com/docs/javascript"
+				},
+				{
+					"description": "Figma design resources.",
+					"section": "Advanced",
+					"title": "Figma",
+					"url": "https://ui.shadcn.com/docs/figma"
+				},
+				{
+					"description": "Generating UI with v0 by Vercel.",
+					"section": "Advanced",
+					"title": "v0",
+					"url": "https://ui.shadcn.com/docs/v0"
+				}
+			],
+			"name": "Advanced"
+		},
+		{
+			"links": [
+				{
+					"description": "Model Context Protocol server for AI integrations. Allows AI assistants to browse, search, and install components from registries using natural language. Works with Claude Code, Cursor, VS Code (GitHub Copilot), Codex and more.",
+					"section": "MCP Server",
+					"title": "MCP Server",
+					"url": "https://ui.shadcn.com/docs/mcp"
+				}
+			],
+			"name": "MCP Server"
+		},
+		{
+			"links": [
+				{
+					"description": "Creating and publishing your own component registry.",
+					"section": "Registry",
+					"title": "Registry Overview",
+					"url": "https://ui.shadcn.com/docs/registry"
+				},
+				{
+					"description": "Set up your own registry.",
+					"section": "Registry",
+					"title": "Getting Started",
+					"url": "https://ui.shadcn.com/docs/registry/getting-started"
+				},
+				{
+					"description": "Example registries.",
+					"section": "Registry",
+					"title": "Examples",
+					"url": "https://ui.shadcn.com/docs/registry/examples"
+				},
+				{
+					"description": "Common questions about registries.",
+					"section": "Registry",
+					"title": "FAQ",
+					"url": "https://ui.shadcn.com/docs/registry/faq"
+				},
+				{
+					"description": "Adding authentication to your registry.",
+					"section": "Registry",
+					"title": "Authentication",
+					"url": "https://ui.shadcn.com/docs/registry/authentication"
+				},
+				{
+					"description": "MCP integration for registries.",
+					"section": "Registry",
+					"title": "Registry MCP",
+					"url": "https://ui.shadcn.com/docs/registry/mcp"
+				}
+			],
+			"name": "Registry",
+			"subsections": [
+				{
+					"links": [
+						{
+							"description": "JSON Schema for registry index files. Defines the structure for a collection of components, hooks, pages, etc. Requires name, homepage, and items array.",
+							"section": "Registry",
+							"subsection": "Registry Schemas",
+							"title": "Registry Schema",
+							"url": "https://ui.shadcn.com/schema/registry.json"
+						},
+						{
+							"description": "JSON Schema for individual registry items. Defines components, hooks, themes, and other distributable code with properties for dependencies, files, Tailwind config, CSS variables, and more.",
+							"section": "Registry",
+							"subsection": "Registry Schemas",
+							"title": "Registry Item Schema",
+							"url": "https://ui.shadcn.com/schema/registry-item.json"
+						}
+					],
+					"name": "Registry Schemas"
+				}
+			]
+		}
+	]
+}

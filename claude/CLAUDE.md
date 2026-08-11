@@ -2,25 +2,98 @@
 
 ## Skills
 
-Two skills carry the detailed standards for the two domains I work in most. **Invoke the
-skill before writing code in its domain** — do not reconstruct its rules from memory, and do
-not restate them here.
+My skills live in `~/.claude/skills/` (real source: `~/.dotfiles/claude/skills/`). They carry
+the depth this file only summarizes. **Invoke the relevant skill with the Skill tool *before*
+writing code in its domain**, not after — and don't reconstruct a skill's contents from memory.
 
-| Skill | Invoke whenever the work touches… |
+### Precedence: this file wins on stack and conventions
+
+These skills are **generic technique references**, not my house style. They were written
+stack-agnostically and their examples routinely use things I do not use: TypeScript,
+Sequelize/Prisma/Mongoose, `winston`, `console.log`, `npm`-installed UI components. When that
+happens:
+
+- Take the **technique** from the skill (the algorithm, the threat model, the query plan, the
+  protocol, the component pattern).
+- Take the **conventions** from this file (plain JavaScript, `pg` with parameterized SQL and no
+  ORM, the shared pino logger, the `{ data }` / `{ error: { message } }` envelope, the layer
+  boundaries, colocated Vitest tests).
+- Translate as you copy. Never paste a skill snippet in verbatim if it violates a rule below.
+
+### Skill layout
+
+Each skill's `SKILL.md` is an index — short, with a "Quick Start" and a table of deeper docs.
+The substance is in the subdirectories, so don't stop at `SKILL.md`:
+
+- `references/` — the detailed guides. **Load the specific reference the task needs.**
+- `templates/` and `scripts/` — working, copy-in implementations. Prefer adapting these over
+  writing an equivalent from scratch.
+- `assets/` — `tailwind-ui` and `shadcn` only; large template/component libraries to search
+  before hand-writing markup.
+
+### Routing table
+
+**Backend / HTTP**
+
+| Skill | Reach for it when… |
 |---|---|
-| **`rest-api`** | Any HTTP endpoint: adding/changing/reviewing a route, controller, service, model, schema, status code, pagination, error shape, or `docs/openapi.yaml`. |
-| **`ui-design`** | Any user-facing surface: a page, layout, component, form, table, badge, modal, or "make this look right" styling pass. |
+| `rest-api-design` | Designing or reviewing an endpoint: resource modeling, URL shape, method choice, status codes, response shape. The default starting point for new API surface. |
+| `nodejs-express-server` | Wiring the Express app itself: middleware order, routers, request lifecycle, error middleware, graceful shutdown. |
+| `api-reference-documentation` | Anything touching `docs/openapi.yaml` — spec structure, schema authoring, examples, describing auth. |
+| `api-pagination` | Any endpoint returning a collection. Offset/limit vs cursor vs keyset, and the query cost of each. |
+| `api-versioning-strategy` | A breaking change, a deprecation, or a decision about how versions are carried. |
+| `api-response-optimization` | Slow responses or fat payloads: caching headers, compression, field selection, N+1 elimination. |
+| `real-time-features` | A feature needs to push to the client. **Start here** — it picks the transport (WebSocket vs SSE vs polling). |
+| `websocket-implementation` | WebSockets are already the chosen transport: connection lifecycle, message routing, auth on upgrade, scaling across instances. |
 
-Rules:
+**Security**
 
-- The skill is the **authority in its domain**. Where this file and a skill disagree on a
-  detail the skill covers, the skill wins; this file only records project-shape deltas
-  (noted inline below).
-- Load the skill's `references/` files when the task calls for them — `http-semantics.md`
-  and `openapi-pipeline.md` for API work, `components.md` for UI work.
-- The skills' `assets/` are working, copy-in implementations. Prefer copying and adapting
-  them over writing an equivalent from scratch.
-- Run the `rest-api` endpoint checklist before declaring any API change done.
+| Skill | Reach for it when… |
+|---|---|
+| `api-security-hardening` | A broad "is this endpoint safe" pass: CORS, headers, input validation, middleware stack. The umbrella; the ones below go deeper. |
+| `api-authentication` | Implementing or changing how a caller proves identity — JWT, OAuth 2.0, API keys, login/refresh flows. |
+| `session-management` | Session and token *lifecycle*: storage, refresh, rotation, logout, CSRF. |
+| `api-rate-limiting` | Rate-limiting an HTTP surface: algorithm choice, per-key limits, tiers, `429` + `Retry-After`. |
+| `rate-limiting-implementation` | Throttling something that isn't an HTTP endpoint — job queues, DB pools, outbound third-party calls, backpressure. |
+| `sql-injection-prevention` | Writing or reviewing any query, especially dynamic `ORDER BY` / filters / search. |
+| `xss-prevention` | Rendering user-generated content, or setting up CSP. |
+| `security-audit-logging` | An audit trail is needed for compliance or forensics. **Note:** its examples use `winston` — use the shared pino logger instead. |
+
+**Database**
+
+| Skill | Reach for it when… |
+|---|---|
+| `sql-query-optimization` | A query is slow: `EXPLAIN ANALYZE`, index design, join strategy, rewriting. |
+
+**Frontend**
+
+| Skill | Reach for it when… |
+|---|---|
+| `frontend-design` | **Any visual or interactive frontend work — invoke this first.** It's the orchestrator: it classifies the component and routes to the three below in the right order. |
+| `tailwind-ui` | Layout, structure, and decorative patterns. Search its 657 templates before hand-writing markup. |
+| `shadcn` | Interactive components — buttons, dialogs, forms, tables, menus, toasts. |
+| `radix-ui` | A primitive `shadcn` doesn't wrap, or you need lower-level control over accessibility behavior. |
+| `react-component-architecture` | Structuring components and hooks: composition, prop design, state placement, splitting an overgrown component. |
+
+**Performance / diagnostics**
+
+| Skill | Reach for it when… |
+|---|---|
+| `memory-leak-detection` | Memory *grows over time*, OOM kills, container restarts. Diagnosis: heap snapshots, retainer paths. |
+| `memory-optimization` | Steady-state footprint is too high and you want it smaller. |
+
+### Overlapping skills — tie-breakers
+
+Several skills cover adjacent ground. Pick by the distinctions above rather than invoking both:
+
+- Rate limiting → `api-rate-limiting` for HTTP surfaces; `rate-limiting-implementation` for
+  internal resources and backpressure.
+- Real time → `real-time-features` to choose the transport; `websocket-implementation` once
+  WebSockets are chosen.
+- Memory → `memory-leak-detection` when usage climbs; `memory-optimization` when it's flat but
+  too large.
+- API security → `api-security-hardening` for the sweep, then the specific skill for the
+  mechanism you're actually building.
 
 ---
 
@@ -111,9 +184,10 @@ project-root/
 
 ## Backend / REST API
 
-→ **Use the `rest-api` skill.** It owns the layer contracts, the request lifecycle, the
-schema format, the DRY table, and the OpenAPI pipeline with its CI gates. What follows is
-the summary, not a substitute for loading it.
+→ **Skills:** `rest-api-design` for endpoint shape, `nodejs-express-server` for app wiring,
+`api-reference-documentation` for the spec, plus `api-pagination` / `api-versioning-strategy` /
+`api-response-optimization` as the work touches them. The rules below are **mine and are not
+negotiable by a skill** — the skills supply technique inside these constraints.
 
 - Every HTTP surface is resource-oriented REST. URLs name nouns; methods carry the verb.
 - One envelope, always: `{ data: ... }` on success, `{ error: { message } }` on failure,
@@ -202,19 +276,23 @@ the server, no server-rendered HTML.
 
 ### Look and feel
 
-→ **Use the `ui-design` skill** for anything visual. It owns the design tokens (accent,
-gray ramp, radii, shadows, container, type scale), the semantic status palette, the page
-skeleton, and the copy-paste component recipes in its `references/components.md`.
+→ **Invoke `frontend-design` first for anything visual.** It's the orchestrator: it classifies
+what you're building and routes to `tailwind-ui` (layout and structure), `shadcn` (interactive
+components), and `radix-ui` (primitives `shadcn` doesn't wrap) in that order. Pair it with
+`react-component-architecture` when the question is how to decompose, not how to style.
 
-The skill is engine-agnostic; its Tailwind classes port to JSX unchanged. Three
-project-level deltas apply when adopting it into a React SPA:
+Project-level deltas when adopting those skills here:
 
-- **Icons:** use `lucide-react` components, not the skill's icon font.
-- **Interactivity:** build dialogs, dropdowns, tabs, and selects on **Radix UI** primitives
-  instead of copying the skill's `assets/app.js` data-attribute layer — that asset is for
-  server-rendered templates. The skill's *classes* still apply to the Radix markup.
-- **Class composition:** the skill's recipes are literal class strings; in React, compose
-  them with `cn()` and express variants with `class-variance-authority` (below).
+- **Plain JSX, no TypeScript.** `react-component-architecture` and several others show `.tsx`
+  with type annotations. Take the pattern, drop the types, write `.jsx`.
+- **Icons:** `lucide-react` components.
+- **Where `shadcn` components land:** `frontend/src/components/ui/`, as `.jsx`. They're copied
+  in and owned by the project — edit them freely rather than wrapping around them. Everything
+  else stays in `components/` per the structure above.
+- **Class composition:** the skills emit literal class strings; compose them with `cn()` and
+  express variants with `class-variance-authority` (below).
+- **Dark mode and responsiveness are part of "done"** — `frontend-design`'s quality checklist
+  applies to every component.
 
 ### Components
 
@@ -335,7 +413,7 @@ module.exports = {
 
 ## General Principles
 
-- **Use the skills:** `rest-api` for any endpoint work, `ui-design` for any visual work. Load the skill before writing the code, not after — and follow its checklist before calling the work done.
+- **Use the skills:** consult the routing table at the top of this file and invoke the matching skill *before* writing the code, not after. Load the `references/` file the task needs; adapt `templates/` instead of writing from scratch. Skills supply technique; this file supplies the stack and conventions, and wins on any conflict.
 - **Modularity first:** Every piece of logic should be independently replaceable. If changing one thing requires changing three files in unrelated layers, the structure is wrong.
 - **Fix forward:** Don't hack around problems. Identify the root cause and fix it correctly.
 - **No magic:** Avoid frameworks, libraries, or patterns that obscure what is actually happening.
