@@ -69,10 +69,9 @@ The substance is in the subdirectories, so don't stop at `SKILL.md`:
 
 | Skill | Reach for it when… |
 |---|---|
-| `frontend-design` | **Any visual or interactive frontend work — invoke this first.** It's the orchestrator: it classifies the component and routes to the three below in the right order. |
-| `tailwind-ui` | Layout, structure, and decorative patterns. Search its 657 templates before hand-writing markup. |
-| `shadcn` | Interactive components — buttons, dialogs, forms, tables, menus, toasts. |
-| `radix-ui` | A primitive `shadcn` doesn't wrap, or you need lower-level control over accessibility behavior. |
+| `crowsnest-ui` | **The house design system — invoke this first for anything visual, and it decides how the result looks.** Tokens, dark mode, `cn()`/`cva` conventions, the shared component set, page recipes, and an ordered path for migrating an existing app onto it. The standard every app converges on. |
+| `shadcn` | **Raw material, not a style authority.** A primitive the house set doesn't have yet — calendar, combobox, command palette, data table, popover, sheet. Copy it in, then adapt it to the conventions above. |
+| `tailwind-ui` | **Raw material for pages the house system doesn't cover**, which in practice means public-facing ones: marketing, pricing, hero sections, checkout. Its application-UI half largely duplicates `crowsnest-ui`, and where they disagree the house system wins. |
 | `react-component-architecture` | Structuring components and hooks: composition, prop design, state placement, splitting an overgrown component. |
 
 **Performance / diagnostics**
@@ -94,6 +93,8 @@ Several skills cover adjacent ground. Pick by the distinctions above rather than
   too large.
 - API security → `api-security-hardening` for the sweep, then the specific skill for the
   mechanism you're actually building.
+- Frontend → `crowsnest-ui` always, and alone for anything internal. Add `shadcn` only for a
+  primitive it lacks, `tailwind-ui` only for a public-facing page shape. Neither overrides it.
 
 ---
 
@@ -276,9 +277,14 @@ the server, no server-rendered HTML.
 
 ### Look and feel
 
-→ **Invoke `frontend-design` first for anything visual.** It's the orchestrator: it classifies
-what you're building and routes to `tailwind-ui` (layout and structure), `shadcn` (interactive
-components), and `radix-ui` (primitives `shadcn` doesn't wrap) in that order. Pair it with
+→ **Invoke `crowsnest-ui` first for anything visual.** It holds the house design system —
+tokens, dark mode, the shared components, the page recipes — and it is what makes every app
+look like the same product. It decides how the result looks.
+
+`shadcn` and `tailwind-ui` are sources of raw material underneath it, not style authorities:
+reach for `shadcn` when the house set has no primitive for what you need, and `tailwind-ui`
+for public-facing page shapes the house system doesn't cover. Whatever they emit gets
+translated into the conventions above before it lands. Pair either with
 `react-component-architecture` when the question is how to decompose, not how to style.
 
 Project-level deltas when adopting those skills here:
@@ -291,8 +297,8 @@ Project-level deltas when adopting those skills here:
   else stays in `components/` per the structure above.
 - **Class composition:** the skills emit literal class strings; compose them with `cn()` and
   express variants with `class-variance-authority` (below).
-- **Dark mode and responsiveness are part of "done"** — `frontend-design`'s quality checklist
-  applies to every component.
+- **Dark mode and responsiveness are part of "done"** — `crowsnest-ui` closes with a
+  checklist that applies to every component.
 
 ### Components
 
