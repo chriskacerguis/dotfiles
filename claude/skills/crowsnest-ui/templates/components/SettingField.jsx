@@ -20,7 +20,7 @@ const SOURCE_META = {
   database: {
     icon: Database,
     label: 'Set here',
-    hint: 'Configured on this page. It overrides any environment variable.',
+    hint: 'Saved on this page.',
     className: 'text-primary',
   },
   environment: {
@@ -32,7 +32,7 @@ const SOURCE_META = {
   default: {
     icon: Sparkles,
     label: 'Default',
-    hint: 'Never configured — this is the built-in default.',
+    hint: 'Never saved — this is the built-in default.',
     className: 'text-muted-foreground',
   },
 };
@@ -60,6 +60,8 @@ function SourceBadge({ source, envVar }) {
 export function SettingField({ setting, value, onChange, onReset, dirty, error }) {
   const id = useId();
   const disabled = setting.read_only;
+  // Multi-line text needs the width, so its control goes under the label.
+  const wide = setting.type === 'text';
 
   return (
     <div
@@ -69,26 +71,13 @@ export function SettingField({ setting, value, onChange, onReset, dirty, error }
         error && 'border-destructive/60 bg-destructive/[0.04]',
       )}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className={cn('flex flex-col gap-3', !wide && 'sm:flex-row sm:items-start sm:justify-between')}>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Label htmlFor={id} className={cn('text-sm', disabled && 'text-muted-foreground')}>
               {setting.label}
             </Label>
             <SourceBadge source={dirty ? 'database' : setting.source} envVar={setting.env_var} />
-            {setting.requeues ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                    re-evaluates
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Changing this queues every open finding for re-evaluation, so existing priorities are recomputed
-                  under the new rules.
-                </TooltipContent>
-              </Tooltip>
-            ) : null}
           </div>
 
           {setting.help ? <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{setting.help}</p> : null}
@@ -97,7 +86,7 @@ export function SettingField({ setting, value, onChange, onReset, dirty, error }
           {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
         </div>
 
-        <div className="flex shrink-0 items-start gap-2 sm:w-72">
+        <div className={cn('flex shrink-0 items-start gap-2', !wide && 'sm:w-72')}>
           <div className="min-w-0 flex-1">
             <Control id={id} setting={setting} value={value} onChange={onChange} disabled={disabled} />
           </div>
@@ -108,12 +97,12 @@ export function SettingField({ setting, value, onChange, onReset, dirty, error }
                   variant="ghost"
                   size="icon"
                   onClick={() => onReset(setting)}
-                  aria-label={`Reset ${setting.label} to its default`}
+                  aria-label={setting.type === 'secret' ? `Remove the stored ${setting.label}` : `Reset ${setting.label} to its default`}
                 >
                   <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Reset to the environment value or built-in default</TooltipContent>
+              <TooltipContent>{setting.type === 'secret' ? 'Remove the stored credential' : 'Reset to the built-in default'}</TooltipContent>
             </Tooltip>
           ) : null}
         </div>
@@ -239,8 +228,8 @@ function Control({ id, setting, value, onChange, disabled }) {
 
     case 'secret':
       // A stored credential is never sent to the browser, so there is nothing
-      // to show — only whether one exists. Typing replaces it; saving an empty
-      // field clears it.
+      // to show — only whether one exists. Typing replaces it; left blank it is
+      // kept; the reset button beside it removes it.
       return (
         <div className="space-y-1.5">
           <Input
@@ -255,17 +244,41 @@ function Control({ id, setting, value, onChange, disabled }) {
           />
           {setting.configured ? (
             <p className="text-xs text-muted-foreground">
-              A credential is stored. Leave this alone to keep it, type a new one to replace it, or save it empty to
-              remove it.
+              A credential is stored. Leave this blank to keep it, or type a new one to replace it.
             </p>
           ) : null}
         </div>
       );
 
+    case 'text':
+      return (
+        <Textarea
+          id={id}
+          rows={6}
+          disabled={disabled}
+          placeholder={setting.placeholder ?? undefined}
+          value={value ?? ''}
+          onChange={(event) => onChange(event.target.value)}
+          className="font-mono text-xs"
+        />
+      );
+
+    case 'url':
+      return (
+        <Input id={id} type="url" inputMode="url" value={value ?? ''} placeholder={setting.placeholder ?? undefined} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
+      );
+
     case 'string':
     default:
       return (
-        <Input id={id} value={value ?? ''} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
+        <Input
+          id={id}
+          value={value ?? ''}
+          placeholder={setting.placeholder ?? undefined}
+          maxLength={setting.max_length ?? undefined}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.value)}
+        />
       );
   }
 }

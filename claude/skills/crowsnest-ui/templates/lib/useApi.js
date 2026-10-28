@@ -4,11 +4,33 @@ import { api, ApiError } from '@/lib/api';
 /**
  * Fetch a resource, exposing loading / error / data explicitly.
  * `deps` controls refetching; `reload` re-runs on demand.
+ *
+ * `data` belongs to the path it was fetched for. When the path changes (item
+ * 7 → item 8 on the same route) it is null until the new resource arrives, so
+ * a page can never show — or act on — the previous resource under the new URL.
+ * A reload of the same path keeps showing what it has.
+ *
+ * `fetcher` is what loads the path — `api.get` by default, or `fetchAllPages` for
+ * a view that shows a whole paginated list at once. It is called as
+ * `fetcher(path, { signal })` and must be a stable (module-level) function.
  */
-export function useApi(path, deps = [], { enabled = true } = {}) {
-  const [data, setData] = useState(null);
+export function useApi(path, deps = [], { enabled = true, fetcher = api.get } = {}) {
+  const [stored, setStored] = useState({ path: null, value: null });
+  const data = stored.path === path ? stored.value : null;
+  const setData = useCallback(
+    (next) =>
+      setStored((previous) => {
+        const current = previous.path === path ? previous.value : null;
+        return { path, value: typeof next === 'function' ? next(current) : next };
+      }),
+    [path],
+  );
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(enabled);
+  // The path whose latest request has answered, either way. Until the current
+  // path's has, the hook is loading — including the render that first sees the
+  // new path, before the effect below has started its request.
+  const [settledPath, setSettledPath] = useState(null);
   const [reloadToken, setReloadToken] = useState(0);
   const latestRequest = useRef(0);
 
@@ -23,21 +45,23 @@ export function useApi(path, deps = [], { enabled = true } = {}) {
     setLoading(true);
     setError(null);
 
-    api
-      .get(path, { signal: controller.signal })
-      .then((result) => {
+    async function load() {
+      try {
+        const result = await fetcher(path, { signal: controller.signal });
         // Ignore a response that a newer request has superseded.
         if (requestId !== latestRequest.current) return;
-        setData(result);
+        setStored({ path, value: result });
         setError(null);
-      })
-      .catch((caught) => {
+        setSettledPath(path);
+      } catch (caught) {
         if (controller.signal.aborted || requestId !== latestRequest.current) return;
         setError(caught instanceof ApiError ? caught : new ApiError(caught.message, 0));
-      })
-      .finally(() => {
+        setSettledPath(path);
+      } finally {
         if (requestId === latestRequest.current) setLoading(false);
-      });
+      }
+    }
+    load();
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,40 +69,19 @@ export function useApi(path, deps = [], { enabled = true } = {}) {
 
   const reload = useCallback(() => setReloadToken((token) => token + 1), []);
 
-  return { data, error, loading, reload, setData };
+  const awaitingPath = enabled && Boolean(path) && settledPath !== path;
+
+  return { data, error, loading: loading || awaitingPath, reload, setData };
 }
 
-/** A collection endpoint: `{ items, meta }`. */
+/** A paginated list endpoint: `{ data, pagination }`, unwrapped by lib/api.js. */
 export function useCollection(path, deps = [], options) {
   const { data, ...rest } = useApi(path, deps, options);
   return {
     items: data?.items ?? [],
-    total: data?.meta?.pagination?.total ?? 0,
-    pagination: data?.meta?.pagination ?? null,
+    total: data?.pagination?.total ?? 0,
+    pagination: data?.pagination ?? null,
+    meta: data?.meta ?? null,
     ...rest,
   };
-}
-
-/** Run a mutation, exposing `pending` and surfacing the error to the caller. */
-export function useMutation(fn) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState(null);
-
-  const mutate = useCallback(
-    async (...args) => {
-      setPending(true);
-      setError(null);
-      try {
-        return await fn(...args);
-      } catch (caught) {
-        setError(caught);
-        throw caught;
-      } finally {
-        setPending(false);
-      }
-    },
-    [fn],
-  );
-
-  return { mutate, pending, error };
 }

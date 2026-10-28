@@ -12,16 +12,18 @@ const SelectTrigger = React.forwardRef(function SelectTrigger({ className, child
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
-        'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm',
+        'flex h-9 w-full items-center justify-between gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm',
         'placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
         '[&>span]:line-clamp-1',
+        // A field the server rejected (Field sets aria-invalid).
+        'aria-[invalid=true]:border-destructive/70',
         className,
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className="h-4 w-4 opacity-50" aria-hidden="true" />
+        <ChevronDown className="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );

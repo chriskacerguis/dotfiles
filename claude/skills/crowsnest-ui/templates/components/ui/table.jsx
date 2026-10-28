@@ -17,6 +17,10 @@ const TableBody = React.forwardRef(function TableBody({ className, ...props }, r
   return <tbody ref={ref} className={cn('[&_tr:last-child]:border-0', className)} {...props} />;
 });
 
+const TableFooter = React.forwardRef(function TableFooter({ className, ...props }, ref) {
+  return <tfoot ref={ref} className={cn('border-t bg-muted/50 [&>tr]:last:border-b-0', className)} {...props} />;
+});
+
 const TableRow = React.forwardRef(function TableRow({ className, ...props }, ref) {
   return (
     <tr
@@ -48,4 +52,4 @@ const TableCaption = React.forwardRef(function TableCaption({ className, ...prop
   return <caption ref={ref} className={cn('mt-4 text-sm text-muted-foreground', className)} {...props} />;
 });
 
-export { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, TableCaption };
+export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };

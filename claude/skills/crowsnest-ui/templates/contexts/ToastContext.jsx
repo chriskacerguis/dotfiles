@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,8 +22,21 @@ let nextId = 0;
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+  // Each toast's auto-dismiss timer, cleared on unmount so none fires into a
+  // provider that is gone.
+  const timers = useRef(new Map());
+
+  useEffect(() => {
+    const pending = timers.current;
+    return () => {
+      for (const timer of pending.values()) clearTimeout(timer);
+      pending.clear();
+    };
+  }, []);
 
   const dismiss = useCallback((id) => {
+    clearTimeout(timers.current.get(id));
+    timers.current.delete(id);
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
@@ -31,7 +44,7 @@ export function ToastProvider({ children }) {
     (message, { variant = 'info', description = null, duration = 6000 } = {}) => {
       const id = (nextId += 1);
       setToasts((current) => [...current, { id, message, description, variant }]);
-      if (duration > 0) setTimeout(() => dismiss(id), duration);
+      if (duration > 0) timers.current.set(id, setTimeout(() => dismiss(id), duration));
       return id;
     },
     [dismiss],

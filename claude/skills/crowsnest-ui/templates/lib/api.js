@@ -13,8 +13,8 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
     this.status = status;
-    this.code = code;
-    this.details = details;
+    this.code = code ?? null;
+    this.details = details ?? null;
   }
 
   get isUnauthorized() {
@@ -27,6 +27,11 @@ export class ApiError extends Error {
 
   get isNotFound() {
     return this.status === 404;
+  }
+
+  /** Per-field validation messages from a 422, keyed by field name. */
+  get fieldErrors() {
+    return this.details?.fields ?? {};
   }
 }
 
@@ -66,26 +71,39 @@ function notifySessionExpired() {
 
 let refreshInFlight = null;
 
-async function refreshSession() {
-  // Collapse concurrent 401s into a single refresh attempt.
-  if (!refreshInFlight) {
-    refreshInFlight = fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+async function attemptRefresh() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'x-csrf-token': readCsrfToken() ?? '' },
-    })
-      .then((response) => response.ok)
-      .catch(() => false)
-      .finally(() => {
-        refreshInFlight = null;
-      });
+    });
+    return response.ok;
+  } catch {
+    // The network failed, so the session could not be renewed — the caller
+    // treats that exactly like a refused refresh.
+    return false;
+  } finally {
+    refreshInFlight = null;
   }
+}
+
+function refreshSession() {
+  // Collapse concurrent 401s into a single refresh attempt.
+  if (!refreshInFlight) refreshInFlight = attemptRefresh();
   return refreshInFlight;
 }
 
+function isFormData(body) {
+  return typeof FormData !== 'undefined' && body instanceof FormData;
+}
+
 async function request(method, path, body, { retryOnUnauthorized = true, signal } = {}) {
-  const headers = {};
-  if (body !== undefined && body !== null) headers['content-type'] = 'application/json';
+  const hasBody = body !== undefined && body !== null;
+  const headers = { accept: 'application/json' };
+  // A FormData body sets its own multipart boundary; naming a content type here
+  // would break it.
+  if (hasBody && !isFormData(body)) headers['content-type'] = 'application/json';
   if (!['GET', 'HEAD'].includes(method)) {
     const csrf = readCsrfToken();
     if (csrf) headers['x-csrf-token'] = csrf;
@@ -95,13 +113,22 @@ async function request(method, path, body, { retryOnUnauthorized = true, signal 
     method,
     credentials: 'same-origin',
     headers,
-    body: body === undefined || body === null ? undefined : JSON.stringify(body),
+    body: hasBody ? (isFormData(body) ? body : JSON.stringify(body)) : undefined,
     signal,
   });
 
   if (response.status === 204) return null;
 
-  const payload = await response.json().catch(() => ({}));
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (caught) {
+    if (caught?.name === 'AbortError') throw caught;
+    // Every success the API sends is a JSON envelope, so an unreadable one is a
+    // fault (a proxy's error page, a truncated body) — never an empty result.
+    if (response.ok) throw new ApiError('The server sent a response that could not be read.', response.status);
+    payload = {};
+  }
 
   if (!response.ok) {
     // The auth endpoints answer 401 as a normal part of their job — `/auth/me`
@@ -118,16 +145,21 @@ async function request(method, path, body, { retryOnUnauthorized = true, signal 
       notifySessionExpired();
     }
     throw new ApiError(
-      payload?.error?.message ?? `Request failed with status ${response.status}`,
+      payload?.error?.message ?? `The request failed with status ${response.status}.`,
       response.status,
       payload?.error?.code,
       payload?.error?.details,
     );
   }
 
-  // Collections carry pagination alongside the data.
-  if (payload && payload.meta) {
-    return { items: payload.data, meta: payload.meta };
+  // A list carries `pagination` (or, in older APIs, `meta.pagination`) beside its
+  // data; anything else the server says about the set travels in `meta`.
+  if (payload && (payload.pagination || payload.meta)) {
+    return {
+      items: payload.data,
+      pagination: payload.pagination ?? payload.meta?.pagination ?? null,
+      meta: payload.meta ?? null,
+    };
   }
   return payload.data;
 }
@@ -146,6 +178,22 @@ export function toQuery(params = {}) {
   }
   const query = search.toString();
   return query ? `?${query}` : '';
+}
+
+/**
+ * Every item of a paginated list, fetched page by page — for a view that shows
+ * the whole set at once, like an A–Z index. `maxPages` is a ceiling, not a
+ * target: it stops a runaway loop if a server ever miscounts.
+ */
+export async function fetchAllPages(path, { limit = 100, maxPages = 50, signal } = {}) {
+  const separator = path.includes('?') ? '&' : '?';
+  const items = [];
+  for (let page = 1; page <= maxPages; page += 1) {
+    const result = await request('GET', `${path}${separator}limit=${limit}&page=${page}`, undefined, { signal });
+    items.push(...result.items);
+    if (!result.pagination || page >= result.pagination.pages) break;
+  }
+  return items;
 }
 
 export const api = {

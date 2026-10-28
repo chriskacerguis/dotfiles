@@ -81,9 +81,11 @@ images with baked-in white, shadows that vanish, and meaning-colours with no
 
 ## Step 5 — `variants.js`
 
-Collect every inline value→style decision into `cva` maps. This is the step that
-stops future drift, and it is usually the one that most improves consistency,
-because apps accumulate three different reds for the same idea.
+Collect every inline value→style decision into a `concept()` over the shared
+`TONES`, and render it with `ConceptBadge`. This is the step that stops future
+drift, and it is usually the one that most improves consistency, because apps
+accumulate three different reds for the same idea — mapping each onto one of
+eight named tones forces the question of what it actually *means*.
 
 ## Step 6 — Primitives
 
@@ -93,8 +95,9 @@ inconsistently hand-rolled.
 
 ## Step 7 — Shared components and the three states
 
-`PageHeader`, `StateViews`, `StatCard`, `FilterBar`, `SortableHeader`,
-`Pagination`. Then go through every data view and give it real loading, error and
+`PageHeader`, `StateViews` (with `lib/errors.js`), `StatCard`, `FilterBar`,
+`SortableHeader`, `Pagination`, then `Field`, `Notice` and the confirm dialogs
+as forms come up. Then go through every data view and give it real loading, error and
 empty states.
 
 This step usually reveals actual bugs — views that render a blank table on error,

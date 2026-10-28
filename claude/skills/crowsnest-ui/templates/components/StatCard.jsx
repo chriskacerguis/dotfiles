@@ -21,7 +21,8 @@ const VALUE_TONES = {
 /**
  * A single number on the dashboard. Wrapped in a link whenever the number
  * corresponds to a filtered view, so every figure is a way in rather than a
- * dead end.
+ * dead end. A number is formatted here; a string — a rate, a duration, a size
+ * the caller has already worded — is shown as it is.
  */
 export function StatCard({ label, value, hint, tone = 'default', to, icon: Icon }) {
   const content = (
@@ -30,7 +31,7 @@ export function StatCard({ label, value, hint, tone = 'default', to, icon: Icon 
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
         {Icon ? <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" /> : null}
       </div>
-      <p className={cn('mt-2 text-2xl font-semibold tabular-nums', VALUE_TONES[tone])}>{formatNumber(value)}</p>
+      <p className={cn('mt-2 text-2xl font-semibold tabular-nums', VALUE_TONES[tone])}>{typeof value === 'number' ? formatNumber(value) : (value ?? '—')}</p>
       {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
     </>
   );

@@ -8,32 +8,54 @@ a component to import.
 The workhorse. Header, a filter bar in a card, a table, pagination.
 
 ```jsx
+const DEFAULTS = { q: '', status: '', priority: '', sort: '', order: '', page: '' };
+const FILTER_KEYS = ['q', 'status', 'priority'];
+
 export default function Findings() {
-  const { filters, setFilter, reset } = useFilters({ status: '', priority: '' });
-  const { items, total, loading, error, reload } = useCollection(
-    `/api/v1/findings${toQuery(filters)}`,
-    [filters],
-  );
+  useDocumentTitle('Findings');
+  const { filters, setFilter, setFilters } = useFilters(DEFAULTS);
+  const path = `/api/v1/findings${toQuery(filters)}`;
+  const { items, pagination, loading, error, reload } = useCollection(path, [path]);
+  const activeCount = FILTER_KEYS.filter((key) => filters[key]).length;
+  const clearFilters = () => setFilters(Object.fromEntries(FILTER_KEYS.map((key) => [key, ''])));
 
   return (
     <div>
       <PageHeader title="Findings" description="…" />
 
       <Card className="overflow-hidden">
-        <div className="flex flex-wrap items-end gap-3 border-b p-4">
-          <SearchInput value={filters.q} onChange={(v) => setFilter('q', v)} className="w-full sm:w-72" />
-          <FilterSelect label="Priority" value={filters.priority} onChange={(v) => setFilter('priority', v)} options={PRIORITIES} />
-          {dirty ? <Button variant="ghost" size="sm" onClick={reset}>Clear</Button> : null}
-        </div>
+        <FilterBar activeCount={activeCount} onClear={clearFilters}>
+          <SearchField value={filters.q} onSearch={(q) => setFilter('q', q)} className="w-full lg:w-80" />
+          <FilterSelect label="Priority" value={filters.priority} onChange={(v) => setFilter('priority', v)} options={PRIORITY_OPTIONS} />
+        </FilterBar>
 
-        {loading ? <TableSkeleton /> : error ? <ErrorState error={error} onRetry={reload} /> : items.length === 0 ? (
-          <EmptyState title={dirty ? 'Nothing matches those filters' : 'No findings yet'} description={…} />
+        {loading && !items.length ? (
+          <TableSkeleton />
+        ) : error ? (
+          <ErrorState error={error} onRetry={reload} />
+        ) : items.length === 0 ? (
+          activeCount ? (
+            <EmptyState icon={SearchX} title="No findings match these filters" description="Try widening them, or clear them to see everything."
+              action={<Button variant="outline" size="sm" onClick={clearFilters}>Clear filters</Button>} />
+          ) : (
+            <EmptyState title="No findings yet" description={…} />
+          )
         ) : (
-          <Table>…</Table>
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <SortableHeader column="created" label="Opened" firstOrder="desc" sort={filters.sort} order={filters.order}
+                    onSort={(sort, order) => setFilters({ sort, order })} />
+                  …
+                </TableRow>
+              </TableHeader>
+              …
+            </Table>
+            <Pagination pagination={pagination} onPageChange={(page) => setFilter('page', page)} />
+          </>
         )}
       </Card>
-
-      <Pagination total={total} …  />
     </div>
   );
 }
@@ -48,13 +70,23 @@ Points that matter:
 - **Two distinct empty states.** "Nothing yet" and "nothing matches" are
   different problems; the second needs a way to clear filters, the first needs a
   way to create something.
-- **Filters go in the URL** via `useFilters`, so the view is shareable.
+- **Everything is in the URL** — filters, sort, page — via `useFilters`, so the
+  view is a shareable link, survives a reload, and `BackLink` can return to it.
+- **The path is the dependency.** `useCollection(path, [path])`: one string
+  that changes exactly when the request should.
+- **`loading && !items.length`** shows the skeleton on first load only; a
+  re-fetch for a new page keeps the old rows up rather than flashing.
 - Use `TableSkeleton` rather than a spinner when the shape of the result is
   already known — it is less jarring than a layout that pops in.
+- **Bulk actions** on a selectable table: a bar under the filters that appears
+  with the selection, says how many are selected, and reports a partial result
+  honestly ("3 changed; 1 refused" with the reason per item). A new list path is
+  a new selection — clear it when the path changes.
 
 ## Detail page
 
 ```jsx
+<BackLink to="/findings">Back to findings</BackLink>
 <PageHeader title={item.name} description={item.summary} actions={…}>
   <div className="mt-2 flex flex-wrap items-center gap-2">
     <SeverityBadge severity={item.severity} />
@@ -69,8 +101,15 @@ Points that matter:
 ```
 
 Two-thirds / one-third, collapsing to one column below `lg`. Identifying badges
-go in the header's children slot so they sit under the title. Metadata panels use
-a `<dl>` with a `Row` helper rather than a table — it is not tabular data.
+go in the header's children slot so they sit under the title. Each panel is a
+`SectionCard`; metadata inside one is a `DetailList` of `DetailRow`s rather than
+a table — it is not tabular data. Occasional actions ("Request approval") fold
+into a `Disclosure` rather than sitting open as a form. A sentence about the
+item's state ("This request was closed on 3 May") is a `Notice` above the grid.
+
+`BackLink` returns to the list as it was left. `useApi` returns `null` data the
+moment the route's id changes, so moving from item 7 to item 8 can never show
+7's content under 8's URL.
 
 ## Dashboard
 
@@ -100,19 +139,31 @@ bar that appears only when something is dirty.
 
 ## Dialog flows
 
-Confirm-destructive and form-submit, as in `components.md`. The consistent part
-is the aftermath: a toast on success naming what happened, the dialog staying
-open on failure with the error shown, and a reload of the underlying list.
+`ConfirmDialog`, `TypedConfirmDialog` and form dialogs, as in `components.md`.
+The consistent part is the aftermath: a toast on success naming what happened,
+the dialog staying open on failure with the error shown, and a reload of the
+underlying list.
 
 ```jsx
-try {
-  await api.del(`/api/v1/watchlist/${entry.id}`);
-  toast.success(`Stopped watching ${entry.name}`, {
-    description: 'Its findings were resolved. The record that they existed is kept.',
-  });
-  reload();
+async function remove() {
+  try {
+    await api.del(`/api/v1/watchlist/${entry.id}`);
+    toast.success(`Stopped watching ${entry.name}`, {
+      description: 'Its findings were resolved. The record that they existed is kept.',
+    });
+    reload();
+  } catch (caught) {
+    toast.error('Could not remove the watch', { description: describeError(caught).description });
+  }
+}
+```
+
+In a form, a 422 goes to the fields, anything else to a toast:
+
+```jsx
 } catch (caught) {
-  toast.error('Could not remove the watch', { description: caught.message });
+  if (caught.status === 422) setFieldErrors(caught.fieldErrors);
+  else toast.error('Nothing was saved', { description: describeError(caught).description });
 }
 ```
 

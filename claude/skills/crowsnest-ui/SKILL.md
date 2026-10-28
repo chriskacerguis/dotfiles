@@ -1,6 +1,6 @@
 ---
 name: crowsnest-ui
-description: Chris's house design system for React apps - the semantic-token theme, dark mode, cn()/cva conventions, and the shared component set (PageHeader, StateViews, StatCard, FilterBar, SortableHeader, badge maps, data tables, settings fields) extracted from Crow's Nest. Use this whenever building or restyling a React UI in any of Chris's apps: a new page, a dashboard, a table, a form, a settings screen, an empty/loading/error state, a nav shell, or a theme. Also use it when starting a new frontend from scratch, when an app's look needs to match the others, or when a component "should look like Crow's Nest". Load this BEFORE tailwind-ui or shadcn - those supply generic patterns, this supplies the house conventions they must be translated into.
+description: Chris's house design system for React apps - the semantic-token theme, dark mode, cn()/cva conventions, and the shared component set (PageHeader, StateViews, StatCard, FilterBar, SortableHeader, the tone palette and ConceptBadge, Notice, Field, confirm dialogs, detail cards, data tables, settings fields) extracted from Crow's Nest and refined in the help site. Use this whenever building or restyling a React UI in any of Chris's apps: a new page, a dashboard, a table, a form, a settings screen, an empty/loading/error state, a nav shell, or a theme. Also use it when starting a new frontend from scratch, when an app's look needs to match the others, or when a component "should look like Crow's Nest". Load this BEFORE tailwind-ui or shadcn - those supply generic patterns, this supplies the house conventions they must be translated into.
 ---
 
 # The house design system
@@ -26,10 +26,12 @@ appear in exactly one situation: **encoding a value's meaning** — a severity, 
 status, a priority. Those need to survive a theme change because red *means*
 something.
 
-**Meaning lives in one map, not in the markup.** Every value→style mapping is a
-`cva` map in `lib/variants.js`. Recolouring "critical" everywhere is one edit.
-Scattering `className={status === 'bad' ? 'text-red-600' : ...}` across pages is
-how a product drifts out of alignment with itself.
+**Meaning lives in one map, not in the markup.** There is one escalation
+palette — eight named tones in `TONES` in `lib/variants.js` — and every concept
+(a status, a priority, a health) is a `concept()` that maps its values onto those
+tones and words. Recolouring "critical" everywhere is one edit; a new state is
+one line. Scattering `className={status === 'bad' ? 'text-red-600' : ...}` across
+pages is how a product drifts out of alignment with itself.
 
 **Every data view states its three states explicitly.** Loading, error, empty.
 `StateViews.jsx` gives you all three, and a page that renders a bare table with
@@ -75,9 +77,12 @@ Follow these and the result will fit; the references explain the rest.
 override a component's own classes without specificity fights, which is why every
 component takes `className` and passes it through `cn()` last.
 
-**Express variants with `cva`, in `lib/variants.js`.** Not inline ternaries. Make
-sure Tailwind's `content` glob covers `lib/` or the classes get purged in
-production and you get unstyled badges only in the build.
+**Express meaning with a `concept()` in `lib/variants.js`.** Pick tones from the
+shared `TONES` palette rather than writing new colour strings; render with
+`ConceptBadge` (or a thin wrapper over it). Use `cva` for component *shape*
+variants. Not inline ternaries. Make sure Tailwind's `content` glob covers `lib/`
+or the classes get purged in production and you get unstyled badges only in the
+build.
 
 **Order classes layout-first**: display → position → sizing → spacing →
 typography → color → border → effects. It makes long class strings scannable and
@@ -121,21 +126,25 @@ A component that looks right but says "Error" is not done.
 
 ## A component that fits, end to end
 
-```jsx
-import { cn } from '@/lib/utils';
-import { priorityBadge } from '@/lib/variants';
+```js
+// lib/variants.js — the meaning, once
+export const orderStatus = concept({
+  tones: { pending: 'medium', shipped: 'active', delivered: 'good', cancelled: 'neutral' },
+  labels: { pending: 'Awaiting payment' },
+});
+```
 
-/**
- * Why this component exists, and any judgement call inside it.
- */
-export function PriorityBadge({ priority, className }) {
-  if (!priority) return <span className="text-muted-foreground">—</span>;
-  return <span className={cn(priorityBadge({ priority }), className)}>{humanize(priority)}</span>;
+```jsx
+// components/Badges.jsx — a name for it
+/** Where an order is. An unknown future state renders neutrally, in its own words. */
+export function OrderStatusBadge({ status, className }) {
+  return <ConceptBadge concept={orderStatus} value={status} className={className} />;
 }
 ```
 
-Small, one job, `className` passed through, a real fallback for the empty case,
-and the colour decision delegated to the shared map. That is the whole pattern.
+Small, one job, `className` passed through, a real fallback for the empty case
+(`ConceptBadge` renders an em dash), and the colour decision delegated to the
+shared palette. That is the whole pattern.
 
 ## Checklist before calling a UI change done
 

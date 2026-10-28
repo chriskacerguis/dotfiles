@@ -27,6 +27,9 @@
   }
 
   :root[data-theme='dark'] {
+    /* Native controls — a date input's calendar icon, scrollbars — follow the
+       theme instead of drawing light-mode glyphs on a dark field. */
+    color-scheme: dark;
     --background: 222 47% 8%;
     --foreground: 210 40% 96%;
     --card: 222 44% 11%;
@@ -57,7 +60,8 @@
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 
-  /* Keyboard focus is always visible; this is a security tool used at speed. */
+  /* Keyboard focus is always visible: this is a tool people use at speed, and
+     focus must never be ambiguous. Do not remove it per component. */
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }

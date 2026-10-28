@@ -13,6 +13,9 @@ npm install react react-dom react-router-dom \
   @radix-ui/react-dropdown-menu @radix-ui/react-switch @radix-ui/react-tabs \
   @radix-ui/react-tooltip @radix-ui/react-label @radix-ui/react-separator
 
+# Only once the app has a searchable picker (ui/popover + ui/command):
+npm install @radix-ui/react-popover cmdk
+
 npm install -D tailwindcss postcss autoprefixer vite @vitejs/plugin-react \
   vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
@@ -40,7 +43,9 @@ frontend/
     ├── layouts/            # route-level shells
     ├── pages/              # route views, grouped by domain
     ├── contexts/           # Theme, Auth, Toast
-    └── lib/                # api.js, useApi.js, utils.js, variants.js, format.js
+    └── lib/                # api.js, errors.js, useApi.js, useFilters.js, listView.js,
+                            # utils.js, variants.js, format.js, useDebouncedValue.js,
+                            # useDocumentTitle.js
 ```
 
 The split that matters: `components/` take data and callbacks as props and hold
@@ -105,7 +110,9 @@ The full file, including the Radix accordion keyframes, is in
 `templates/index.css` is the whole thing. Three parts worth knowing about:
 
 1. **`:root` and `:root[data-theme='dark']`** define every token. This is the
-   only place colour is decided for chrome.
+   only place colour is decided for chrome. The dark block also sets
+   `color-scheme: dark`, so native controls — a date input's calendar icon,
+   scrollbars — draw dark glyphs instead of light ones on a dark field.
 2. **`* { @apply border-border }`** means a bare `border` class is already the
    right colour. That is why components say `className="border"` and nothing
    more.
@@ -181,3 +188,20 @@ behaviour and rendered output, never implementation details.
 
 Every import in this system uses `@/` for `src/`. Set it in both `vite.config.js`
 and `vitest.config.js` or tests resolve differently from the build.
+
+## Environment
+
+Document these in `frontend/.env.example`:
+
+| Variable | Used by | Default |
+|---|---|---|
+| `VITE_API_BASE_URL` | `lib/api.js` | empty — same origin |
+| `VITE_SITE_NAME` | `lib/useDocumentTitle.js` | `App` |
+
+## A strict Content-Security-Policy
+
+Radix's scroll lock (dialogs, selects) and the Select viewport inject `<style>`
+elements. Under a nonce-based `style-src`, they are refused unless they carry the
+request's nonce: have the server write it into `index.html`, read it in
+`main.jsx`, hand it over with `setNonce` from `get-nonce`, and pass
+`nonce={getNonce()}` to `SelectPrimitive.Viewport`. Without a CSP, skip this.

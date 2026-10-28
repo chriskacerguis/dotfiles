@@ -41,7 +41,26 @@ meaning-colours below stay legible.
 
 These are the deliberate exception to "never use raw palette colours". A
 severity, a status, a priority *means* something, and that meaning must survive
-recolouring the brand. They live as `cva` maps in `lib/variants.js`.
+recolouring the brand. They are written out exactly once, as the eight named
+tones of `TONES` in `lib/variants.js`; every concept maps its values onto those
+names (`concept({ tones: { failed: 'critical', … } })`) and nothing else writes a
+meaning-colour string. `Notice` and `ConceptBadge` both read `TONES`, so a
+warning banner and a warning badge cannot drift apart.
+
+| Tone | Hue | Means |
+|---|---|---|
+| `critical` | red | something is wrong or refused |
+| `high` | orange | needs attention soon |
+| `medium` | amber | waiting, in flux, or partly there |
+| `low` | sky | fine, but in motion |
+| `good` | emerald | done, healthy, approved |
+| `active` | blue | being worked |
+| `progress` | violet | in progress, a step past active |
+| `neutral` | muted tokens | inert, ended, unknown |
+
+Choosing a tone is choosing a meaning. "Pending" is `medium` when it waits on a
+person and `low` when it is merely queued; if two values of one concept want the
+same tone, that is fine — the words tell them apart.
 
 The shape is always: light tint + saturated text in light mode, translucent dark
 tint + pale text in dark mode.
@@ -57,6 +76,10 @@ low        border-sky-300     bg-sky-50     text-sky-800
            dark:border-sky-900/60  dark:bg-sky-950/60  dark:text-sky-200
 good       border-emerald-300 bg-emerald-50 text-emerald-800
            dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-emerald-200
+active     border-blue-300    bg-blue-50    text-blue-800
+           dark:border-blue-900/60  dark:bg-blue-950/60  dark:text-blue-200
+progress   border-violet-300  bg-violet-50  text-violet-800
+           dark:border-violet-900/60 dark:bg-violet-950/60 dark:text-violet-200
 neutral    border-border      bg-muted      text-muted-foreground
 ```
 
@@ -69,8 +92,14 @@ is clearly "not urgent". Never encode meaning by hue alone; the label is always
 present in text too, because a meaningful proportion of users cannot
 discriminate red from green.
 
-For a "this is fine" state use emerald, and reserve `destructive` for actions
+For a "this is fine" state use `good`, and reserve `destructive` for actions
 that destroy something rather than for states that happen to be bad.
+
+**Classes that only arrive in server HTML** (rendered markdown — a callout's
+`data-callout="warning"`) must be styled in unlayered CSS in `index.css`, using
+the same colour pairs as `TONES`. Inside an `@layer`, Tailwind purges a rule
+whose class it never sees in the frontend source, and the styling vanishes from
+the production build only.
 
 ## Type
 

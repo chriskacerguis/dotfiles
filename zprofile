@@ -1,3 +1,7 @@
+# The following lines were added by Docker Desktop to add commands to your PATH.
+export PATH="$PATH:/Users/chriskacerguis/.docker/bin"
+# End of Docker Desktop section.
+
 # Fix for Workbrew Installs
 if [ -d "/opt/workbrew" ]; then
   autoload -U compinit && compinit -u

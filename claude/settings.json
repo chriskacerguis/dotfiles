@@ -26,6 +26,11 @@
       "Read(./.env)"
     ]
   },
+  "model": "opus[1m]",
   "effortLevel": "high",
-  "model": "opus[1m]"
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  }
 }

@@ -1,7 +1,8 @@
-import { AlertCircle, Clock, Inbox, Loader2, Lock, SearchX } from 'lucide-react';
+import { Inbox, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { describeError } from '@/lib/errors';
 
 /** The three states every data view handles explicitly: loading, error, empty. */
 
@@ -29,32 +30,24 @@ export function TableSkeleton({ rows = 6, columns = 5 }) {
 }
 
 export function ErrorState({ error, onRetry, className }) {
-  const isForbidden = error?.status === 403;
-  // A 401 means the session ended. The auth provider is already redirecting to
-  // sign-in, so this is the frame or two before that lands — it should not
-  // accuse the analyst of having broken something, and it must not offer a
-  // "Try again" that can only fail the same way.
-  const isUnauthenticated = error?.status === 401;
-  const Icon = isForbidden ? Lock : isUnauthenticated ? Clock : AlertCircle;
+  const { kind, icon: Icon, title, description } = describeError(error);
+  // A 401 inside a page means the session ended mid-use. AuthContext is already
+  // redirecting to sign-in, so this is the frame or two before that lands — it
+  // must not accuse the person of breaking something, and must not offer a
+  // "Try again" that can only fail the same way. Nor can retrying a 403 or 404.
+  const isUnauthenticated = kind === 'unauthorized';
+  const canRetry = onRetry && (kind === 'failed' || kind === 'unreachable');
 
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3 px-4 py-12 text-center', className)} role="alert">
       <Icon className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
       <div>
-        <p className="text-sm font-medium">
-          {isForbidden
-            ? 'You do not have access to this'
-            : isUnauthenticated
-              ? 'Your session has ended'
-              : 'Something went wrong'}
-        </p>
+        <p className="text-sm font-medium">{isUnauthenticated ? 'Your session has ended' : title}</p>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          {isUnauthenticated
-            ? 'Taking you to the sign-in page…'
-            : error?.message || 'The request could not be completed.'}
+          {isUnauthenticated ? 'Taking you to the sign-in page…' : description}
         </p>
       </div>
-      {onRetry && !isForbidden && !isUnauthenticated ? (
+      {canRetry ? (
         <Button variant="outline" size="sm" onClick={onRetry}>
           Try again
         </Button>
@@ -73,22 +66,5 @@ export function EmptyState({ title, description, icon: Icon = Inbox, action, cla
       </div>
       {action}
     </div>
-  );
-}
-
-export function NoResults({ onClear }) {
-  return (
-    <EmptyState
-      icon={SearchX}
-      title="No results match these filters"
-      description="Try widening the filters or clearing them entirely."
-      action={
-        onClear ? (
-          <Button variant="outline" size="sm" onClick={onClear}>
-            Clear filters
-          </Button>
-        ) : null
-      }
-    />
   );
 }
